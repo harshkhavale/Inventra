@@ -51,7 +51,7 @@ export function StockReport({ state, period }: { state: InventoryState; period: 
     { key: "rv", header: "Retail value", className: "w-[120px]", align: "right", cell: (i) => <span className="tabular">{formatMoney(totalQty(i) * i.price)}</span> },
     { key: "margin", header: "Margin", className: "w-[110px]", align: "right", cell: (i) => <span className="tabular text-muted-foreground">{marginPct(i)}%</span> },
     {
-      key: "status",
+      key: "status", mobile: "aside",
       header: "Status",
       className: "w-[130px]",
       cell: (i) => {
@@ -70,7 +70,7 @@ export function StockReport({ state, period }: { state: InventoryState; period: 
 
   return (
     <>
-      <StatGrid min={200}>
+      <StatGrid min={150}>
         <StatCard label="Stock value at cost" value={formatCompactMoney(atCost)} sub={`${formatNumber(units)} units on hand`} />
         <StatCard label="Stock value at selling price" value={formatCompactMoney(atRetail)} sub={`${formatCompactMoney(atRetail - atCost)} potential gross margin`} />
         <StatCard label="Items below minimum" value={String(low.length)} sub={`${low.filter((i) => totalQty(i) === 0).length} out of stock`} />

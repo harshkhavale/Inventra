@@ -20,11 +20,11 @@ export interface StatProps {
 function StatBody({ label, value, sub, tone = "muted", large }: StatProps & { large?: boolean }) {
   return (
     <>
-      <CardHeader className="px-5">
+      <CardHeader className="px-4 sm:px-5">
         <CardDescription className="text-[13px] font-medium">{label}</CardDescription>
-        <CardTitle className={cn("tabular font-semibold tracking-tight", large ? "text-[28px]" : "text-[22px]")}>{value}</CardTitle>
+        <CardTitle className={cn("tabular font-semibold tracking-tight", large ? "text-2xl sm:text-[28px]" : "text-xl sm:text-[22px]")}>{value}</CardTitle>
       </CardHeader>
-      <CardFooter className="px-5">
+      <CardFooter className="px-4 sm:px-5">
         <span className={cn("text-[12.5px]", textTones[tone])}>{sub}</span>
       </CardFooter>
     </>
@@ -51,7 +51,7 @@ export function StatCard(stat: StatProps) {
   );
 }
 
-export function StatGrid({ children, min = 220 }: { children: React.ReactNode; min?: number }) {
+export function StatGrid({ children, min = 160 }: { children: React.ReactNode; min?: number }) {
   return (
     <div className="grid gap-3.5" style={{ gridTemplateColumns: `repeat(auto-fit, minmax(min(${min}px, 100%), 1fr))` }}>
       {children}

@@ -98,7 +98,7 @@ export function PurchasesView() {
       },
     },
     {
-      key: "status",
+      key: "status", mobile: "aside",
       header: "Status",
       className: "w-[100px]",
       cell: (p) => {

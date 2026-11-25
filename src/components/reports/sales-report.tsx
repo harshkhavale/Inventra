@@ -62,7 +62,7 @@ export function SalesReport({ state, period }: { state: InventoryState; period: 
 
   return (
     <>
-      <StatGrid min={200}>
+      <StatGrid min={150}>
         <StatCard label="Sales booked" value={formatCompactMoney(booked)} sub={`${orders.length} orders incl. GST`} />
         <StatCard label="Average order value" value={formatCompactMoney(orders.length ? booked / orders.length : 0)} sub="Per sales order" />
         <StatCard label="Collected" value={formatCompactMoney(collected)} sub={`${Math.round(percent(collected, booked))}% of booked value`} />

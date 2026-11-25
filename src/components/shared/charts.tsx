@@ -95,7 +95,7 @@ export function BarRows({ data }: { data: RankDatum[] }) {
   return (
     <ul className="pb-3">
       {data.map((d) => (
-        <li key={d.key} className="grid grid-cols-[130px_1fr_96px] items-center gap-3.5 px-5 py-2.5">
+        <li key={d.key} className="grid grid-cols-[minmax(0,110px)_1fr_80px] items-center gap-3 px-5 py-2.5 sm:grid-cols-[130px_1fr_96px] sm:gap-3.5">
           <span className="text-[13.5px]">{d.label}</span>
           <Meter value={d.share} fill={d.fill} className="h-2.5" label={d.label} />
           <span className="tabular justify-self-end font-semibold">{d.value}</span>

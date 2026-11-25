@@ -96,7 +96,7 @@ function ItemsTable({ state }: { state: InventoryState }) {
     { key: "total", header: "Total", className: "w-[80px]", align: "right", cell: (i) => <span className="tabular font-semibold">{formatNumber(totalQty(i))}</span> },
     { key: "min", header: "Min", className: "w-[60px]", align: "right", cell: (i) => <span className="tabular text-muted-foreground">{formatNumber(i.minLevel)}</span> },
     {
-      key: "status",
+      key: "status", mobile: "aside",
       header: "Status",
       className: "w-[120px]",
       cell: (i) => {
@@ -171,7 +171,7 @@ function HistoryTable({ state }: { state: InventoryState }) {
     { key: "type", header: "Movement", className: "w-[130px]", cell: (m) => <StatusBadge tone={movementTone[m.type]}>{m.type}</StatusBadge> },
     { key: "ref", header: "Reference", className: "w-[120px]", cell: (m) => <span className="tabular text-muted-foreground">{m.ref}</span> },
     {
-      key: "qty",
+      key: "qty", mobile: "aside",
       header: "Qty",
       className: "w-[100px]",
       align: "right",

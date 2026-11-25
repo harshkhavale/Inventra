@@ -59,7 +59,7 @@ function Kpis({ state }: { state: InventoryState }) {
   const units = state.items.reduce((s, i) => s + totalQty(i), 0);
 
   return (
-    <StatGrid min={200}>
+    <StatGrid min={150}>
       <KpiTile href="/stock" label="Stock value at cost" value={formatCompactMoney(stockValue(state.items))} sub={`${formatNumber(units)} units in ${GODOWNS.length} godowns`} />
       <KpiTile
         href="/stock?status=low"

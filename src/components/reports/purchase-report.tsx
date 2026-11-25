@@ -45,7 +45,7 @@ export function PurchaseReport({ state, period }: { state: InventoryState; perio
 
   return (
     <>
-      <StatGrid min={200}>
+      <StatGrid min={150}>
         <StatCard label="Purchases raised" value={formatCompactMoney(spend)} sub={`${orders.length} purchase orders incl. GST`} />
         <StatCard label="Received into stock" value={formatCompactMoney(totalValue(received))} sub={`${formatNumber(received.reduce((s, p) => s + units(p.lines), 0))} units booked in`} />
         <StatCard label="Still pending" value={formatCompactMoney(totalValue(pending))} sub={`${plural(pending.length, "PO")} open`} />

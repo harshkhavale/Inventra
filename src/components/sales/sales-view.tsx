@@ -69,7 +69,7 @@ export function SalesView() {
     { key: "items", header: "Items", className: "w-[150px] whitespace-nowrap", cell: (o) => <span className="text-muted-foreground">{linesSummary(o.lines)}</span> },
     { key: "amount", header: "Amount", className: "w-[120px]", align: "right", cell: (o) => <span className="tabular font-semibold">{formatMoney(orderTotal(o.lines))}</span> },
     {
-      key: "status",
+      key: "status", mobile: "aside",
       header: "Status",
       className: "w-[150px]",
       cell: (o) => (

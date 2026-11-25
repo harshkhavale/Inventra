@@ -60,13 +60,13 @@ export function LowStockAlerts({ state }: { state: InventoryState }) {
         const t = totalQty(i);
         const onOrder = qtyAcross(pending, i.sku);
         return (
-          <PanelRow key={i.sku} className="gap-4 py-3.5">
+          <PanelRow key={i.sku} className="items-start gap-3 py-3.5 sm:items-center sm:gap-4">
             <div className="min-w-0 flex-1">
-              <div className="flex items-baseline justify-between gap-3">
-                <RecordLink onClick={() => openDrawer({ type: "item", sku: i.sku })} className="truncate">
+              <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
+                <RecordLink onClick={() => openDrawer({ type: "item", sku: i.sku })} className="min-w-0">
                   {i.name}
                 </RecordLink>
-                <span className="tabular font-semibold whitespace-nowrap">
+                <span className="tabular shrink-0 font-semibold whitespace-nowrap">
                   {formatNumber(t)} <span className="font-medium text-muted-foreground">/ min {formatNumber(i.minLevel)}</span>
                 </span>
               </div>
