@@ -2,7 +2,20 @@
 
 A small inventory app for **Sen & Sons Electricals**, a fictional electrical wholesaler with three godowns around Kolkata. It covers stock, sales, purchases, transfers between godowns, a customer/supplier directory and reports, and every module is connected to the same data.
 
-Built with **Next.js 16 (App Router)**, **React 19**, **TypeScript** and **Tailwind CSS v4**. No login and no backend: the app runs on sample data saved in the browser.
+Built with **Next.js 16 (App Router)**, **React 19**, **TypeScript**, **Tailwind CSS v4** and **shadcn/ui**. No login and no backend: the app runs on sample data saved in the browser.
+
+## Tech stack
+
+| Area | Choice |
+| --- | --- |
+| Framework | Next.js 16 (App Router), React 19, TypeScript |
+| Styling | Tailwind CSS v4 with shadcn/ui CSS variables mapped to the Inventra palette |
+| Components | [shadcn/ui](https://ui.shadcn.com) (new-york style) on Radix UI primitives |
+| Charts | shadcn Chart (Recharts) |
+| Toasts | Sonner via the shadcn `Toaster` |
+| Icons | lucide-react |
+
+shadcn/ui components used: Sidebar, Breadcrumb, Button, Card, Badge, Table, Tabs, Toggle Group, Input Group, Input, Select, Field, Label, Dialog, Sheet, Progress, Skeleton, Separator, Avatar, Tooltip, Chart and Sonner. They live in `src/components/ui/` and are configured by `components.json`, so `npx shadcn add <component>` works as usual.
 
 ## Getting started
 
@@ -52,13 +65,14 @@ Clicking any item opens an **item drawer** with stock by godown, on order and co
 src/
 ├── app/                    Routes. Pages are thin and mostly server-rendered headers.
 ├── components/
-│   ├── ui/                 Design-system primitives: Button, Badge, Card, DataTable,
-│   │                       FilterChips, Segmented, Modal/Drawer, charts…
+│   ├── ui/                 shadcn/ui components (vendored source, owned by the project)
+│   ├── shared/             App components built on shadcn: DataTable, FilterChips,
+│   │                       SearchInput, ViewTabs, Panel, StatCard, StatusBadge, charts…
 │   ├── layout/             App shell, sidebar, navigation config
-│   ├── overlays/           Item & order drawers, sale / PO / transfer forms, toast
-│   ├── providers/          UI state (open drawer, open form, toast)
+│   ├── overlays/           Item & order sheets, sale / PO / transfer dialogs
+│   ├── providers/          UI state (open sheet, open form)
 │   └── <module>/           One folder per module view
-├── hooks/                  useCommands (workflows → store + toast), useUrlFilter
+├── hooks/                  useCommands (workflows → store + toast), useUrlFilter, useIsMobile
 ├── lib/                    Types, constants, seed data, formatters, selectors, status styles
 └── store/                  Pure workflow commands + the persisted store
 ```
@@ -68,8 +82,11 @@ src/
 - **Business logic is pure and lives outside React.** `store/commands.ts` holds `dispatchSale`, `receivePurchase`, `transferStock` and the other workflows. Each takes the current state and returns the next state plus a message, or an error. That keeps the rules in one readable place and easy to test.
 - **The store is `useSyncExternalStore`.** The server and the first client render use the seed data, and the browser then switches to the saved copy. This avoids hydration mismatches without effects or loading flags.
 - **Filters live in the URL** (`/stock?status=low`, `/sales?status=confirmed`), so dashboard tiles link straight to filtered views and those views can be bookmarked.
-- **Drawers and modals use the native `<dialog>` element**, which handles focus trapping, Escape and the inert background. The toast is a manual popover, so it shows above an open drawer.
+- **shadcn/ui is used as intended: the source is owned.** The project made a few small edits: status variants on `Badge`, an `indicatorClassName` on `Progress`, a light-only `Toaster`, and two fixes so the vendored code passes the React Compiler lint rules (`useIsMobile` uses `useSyncExternalStore`; the sidebar skeleton has no `Math.random`).
+- **App-specific components wrap shadcn rather than fork it.** `components/shared/` composes shadcn primitives into things the modules repeat, such as a column-driven `DataTable` on shadcn `Table` and status filters on `ToggleGroup`.
+- **Charts render in the browser only** (`use(browser())` inside `Suspense`), because Recharts measures the DOM and generates random ids, which Next 16 does not allow while prerendering.
+- **Dialogs and detail sheets come from shadcn (Radix)**, which handles focus trapping, Escape and screen-reader labelling.
 - **A fixed business date (25 Nov 2026)** keeps "today", "overdue" and "this month" consistent with the sample data whenever the demo is opened.
 - **The Inter font is self-hosted** via `next/font/local`, so the build never needs network access to Google Fonts.
-- **Accessibility**: real buttons and links throughout, labelled inputs and icon buttons, `aria-pressed` on filters, `aria-current` in the nav, and reduced-motion support.
-- **Responsive**: the sidebar becomes a slide-out menu, grids reflow, and wide tables scroll inside their card.
+- **Accessibility**: Radix-based components, labelled inputs and icon buttons, an active state in the nav, and a title and description on every dialog.
+- **Responsive**: the shadcn Sidebar becomes a sheet on mobile (toggle with the button or ⌘/Ctrl+B), grids reflow, and wide tables scroll inside their card.
