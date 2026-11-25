@@ -49,21 +49,24 @@
   --chart-4: #e88a0c;
   --chart-5: #9fb0f5;
 
-  --sidebar: #ecebe5;
-  --sidebar-foreground: #4a4f5c;
+  --sidebar: #0f1320;
+  --sidebar-to: #151b2e;
+  --sidebar-foreground: #c3c9d6;
+  --sidebar-muted: #8b93a7;
   --sidebar-primary: #3047d6;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #e1dfd7;
-  --sidebar-accent-foreground: #0e1424;
-  --sidebar-border: #dedbd3;
-  --sidebar-ring: #3047d6;
+  --sidebar-accent: #1c2338;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #1f2638;
+  --sidebar-ring: #8fa2ff;
 
   --scrollbar: #c9ced8;
 }
 
-/* Warmer scrollbar thumb inside the beige sidebar. */
+/* Ink navy sidebar: a subtle vertical gradient and a faint scrollbar. */
 [data-sidebar="sidebar"] {
-  --scrollbar: #cfccc4;
+  --scrollbar: rgb(255 255 255 / 0.14);
+  background-image: linear-gradient(180deg, var(--sidebar) 0%, var(--sidebar-to) 100%);
 }
 
 @theme inline {
@@ -114,6 +117,7 @@
 
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-muted: var(--sidebar-muted);
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
   --color-sidebar-accent: var(--sidebar-accent);
