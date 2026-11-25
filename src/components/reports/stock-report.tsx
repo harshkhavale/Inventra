@@ -1,12 +1,12 @@
 "use client";
 
 import { useUI } from "@/components/providers/ui-provider";
-import { Badge } from "@/components/ui/badge";
-import { LinkButton } from "@/components/ui/button";
-import { Card, CardHeader, Sub } from "@/components/ui/card";
-import { BarRows } from "@/components/ui/charts";
-import { DataTable, type Column } from "@/components/ui/data-table";
-import { StatCard, StatGrid } from "@/components/ui/stat";
+import { BarRows } from "@/components/shared/charts";
+import { DataTable, Sub, type Column } from "@/components/shared/data-table";
+import { Panel, PanelHeader } from "@/components/shared/panel";
+import { RecordLink } from "@/components/shared/record-link";
+import { StatCard, StatGrid } from "@/components/shared/stat";
+import { StatusBadge } from "@/components/shared/status-badge";
 import { CATEGORIES, TODAY } from "@/lib/constants";
 import { downloadCsv } from "@/lib/csv";
 import { formatCompactMoney, formatDate, formatMoney, formatNumber, formatSigned, percent } from "@/lib/format";
@@ -37,26 +37,26 @@ export function StockReport({ state, period }: { state: InventoryState; period: 
     {
       key: "item",
       header: "Item",
-      width: "minmax(240px, 2fr)",
+      className: "min-w-[240px]",
       cell: (i) => (
         <>
-          <LinkButton onClick={() => openDrawer({ type: "item", sku: i.sku })}>{i.name}</LinkButton>
+          <RecordLink onClick={() => openDrawer({ type: "item", sku: i.sku })}>{i.name}</RecordLink>
           <Sub className="tabular">{i.sku}</Sub>
         </>
       ),
     },
-    { key: "cat", header: "Category", width: "130px", cell: (i) => <span className="text-muted">{i.category}</span> },
-    { key: "qty", header: "On hand", width: "90px", align: "right", cell: (i) => <span className="tabular">{formatNumber(totalQty(i))}</span> },
-    { key: "cv", header: "Cost value", width: "120px", align: "right", cell: (i) => <span className="tabular">{formatMoney(totalQty(i) * i.cost)}</span> },
-    { key: "rv", header: "Retail value", width: "120px", align: "right", cell: (i) => <span className="tabular">{formatMoney(totalQty(i) * i.price)}</span> },
-    { key: "margin", header: "Margin", width: "110px", align: "right", cell: (i) => <span className="tabular text-muted">{marginPct(i)}%</span> },
+    { key: "cat", header: "Category", className: "w-[130px]", cell: (i) => <span className="text-muted-foreground">{i.category}</span> },
+    { key: "qty", header: "On hand", className: "w-[90px]", align: "right", cell: (i) => <span className="tabular">{formatNumber(totalQty(i))}</span> },
+    { key: "cv", header: "Cost value", className: "w-[120px]", align: "right", cell: (i) => <span className="tabular">{formatMoney(totalQty(i) * i.cost)}</span> },
+    { key: "rv", header: "Retail value", className: "w-[120px]", align: "right", cell: (i) => <span className="tabular">{formatMoney(totalQty(i) * i.price)}</span> },
+    { key: "margin", header: "Margin", className: "w-[110px]", align: "right", cell: (i) => <span className="tabular text-muted-foreground">{marginPct(i)}%</span> },
     {
       key: "status",
       header: "Status",
-      width: "130px",
+      className: "w-[130px]",
       cell: (i) => {
         const b = stockBadge[stockLevel(i)];
-        return <Badge tone={b.tone}>{b.label}</Badge>;
+        return <StatusBadge tone={b.tone}>{b.label}</StatusBadge>;
       },
     },
   ];
@@ -78,12 +78,12 @@ export function StockReport({ state, period }: { state: InventoryState; period: 
       </StatGrid>
 
       <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(min(340px, 100%), 1fr))" }}>
-        <Card className="pb-3">
-          <CardHeader title="Stock value by category" subtitle="At cost price" />
+        <Panel className="pb-3">
+          <PanelHeader title="Stock value by category" description="At cost price" />
           <BarRows data={byCategory.map(({ c, v }) => ({ key: c, label: c, value: formatCompactMoney(v), share: percent(v, catMax) }))} />
-        </Card>
-        <Card className="pb-3">
-          <CardHeader title="Inward vs outward" subtitle={`Units moved in the last ${period.days} days`} />
+        </Panel>
+        <Panel className="pb-3">
+          <PanelHeader title="Inward vs outward" description={`Units moved in the last ${period.days} days`} />
           <BarRows
             data={[
               { key: "in", label: "Inward (purchases)", value: formatNumber(inward), share: percent(inward, flowMax), fill: "good" },
@@ -91,13 +91,13 @@ export function StockReport({ state, period }: { state: InventoryState; period: 
               { key: "moved", label: "Moved between godowns", value: formatNumber(moved), share: percent(moved, flowMax), fill: "soft" },
             ]}
           />
-        </Card>
+        </Panel>
       </div>
 
-      <Card>
-        <CardHeader title="Stock register" subtitle={`Snapshot as of ${formatDate(TODAY, true)}, all godowns`} action={<ExportButton onExport={exportCsv} />} />
-        <DataTable columns={columns} rows={state.items} rowKey={(i) => i.sku} empty="No items." rowClassName="min-h-[50px]" />
-      </Card>
+      <Panel>
+        <PanelHeader title="Stock register" description={`Snapshot as of ${formatDate(TODAY, true)}, all godowns`} action={<ExportButton onExport={exportCsv} />} />
+        <DataTable columns={columns} rows={state.items} rowKey={(i) => i.sku} empty="No items." />
+      </Panel>
     </>
   );
 }

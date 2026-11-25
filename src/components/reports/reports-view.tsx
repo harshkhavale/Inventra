@@ -1,7 +1,7 @@
 "use client";
 
-import { Segmented } from "@/components/ui/filters";
-import { PageHeader } from "@/components/ui/page-header";
+import { ViewTabs } from "@/components/shared/filters";
+import { PageHeader } from "@/components/shared/page-header";
 import { useUrlFilter } from "@/hooks/use-url-filter";
 import { TODAY } from "@/lib/constants";
 import { addDays, formatDate } from "@/lib/format";
@@ -42,7 +42,7 @@ export function ReportsView() {
         description={notes[report]}
         actions={
           <>
-            <Segmented
+            <ViewTabs
               label="Report"
               value={report}
               onChange={setReport}
@@ -52,7 +52,7 @@ export function ReportsView() {
                 { key: "purchase", label: "Purchase" },
               ]}
             />
-            <Segmented
+            <ViewTabs
               label="Date range"
               value={range}
               onChange={setRange}

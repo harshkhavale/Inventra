@@ -2,20 +2,21 @@
 
 import { useState } from "react";
 import { useUI } from "@/components/providers/ui-provider";
-import { Badge } from "@/components/ui/badge";
-import { Button, LinkButton } from "@/components/ui/button";
-import { Card, Sub } from "@/components/ui/card";
-import { DataTable, type Column } from "@/components/ui/data-table";
-import { FilterChips, SearchInput, Toolbar } from "@/components/ui/filters";
-import { StatCard, StatGrid } from "@/components/ui/stat";
+import { DataTable, Sub, type Column } from "@/components/shared/data-table";
+import { FilterChips, SearchInput, Toolbar } from "@/components/shared/filters";
+import { Panel } from "@/components/shared/panel";
+import { RecordLink } from "@/components/shared/record-link";
+import { StatCard, StatGrid } from "@/components/shared/stat";
+import { StatusBadge } from "@/components/shared/status-badge";
+import { Button } from "@/components/ui/button";
 import { useCommands } from "@/hooks/use-commands";
 import { matches, useUrlFilter } from "@/hooks/use-url-filter";
 import { godown, TODAY } from "@/lib/constants";
-import { cn } from "@/lib/cn";
 import { formatDate, formatMoney } from "@/lib/format";
 import { byNewest, findItem, findSupplier, isOverdue, linesSummary, orderTotal, pendingPurchases, totalValue } from "@/lib/selectors";
 import { purchaseBadge } from "@/lib/status";
 import type { PurchaseOrder } from "@/lib/types";
+import { cn } from "@/lib/utils";
 import { useInventory } from "@/store/inventory-store";
 
 const FILTERS = ["all", "pending", "overdue", "received"] as const;
@@ -47,12 +48,12 @@ export function PurchasesView() {
     {
       key: "id",
       header: "PO",
-      width: "110px",
+      className: "w-[110px]",
       cell: (p) => (
         <>
-          <LinkButton className="tabular" onClick={() => openDrawer({ type: "purchase", id: p.id })}>
+          <RecordLink className="tabular" onClick={() => openDrawer({ type: "purchase", id: p.id })}>
             {p.id}
-          </LinkButton>
+          </RecordLink>
           <Sub>{formatDate(p.date, true)}</Sub>
         </>
       ),
@@ -60,7 +61,7 @@ export function PurchasesView() {
     {
       key: "supplier",
       header: "Supplier",
-      width: "minmax(180px, 1.5fr)",
+      className: "min-w-[180px]",
       cell: (p) => {
         const s = findSupplier(state, p.supplierId);
         return (
@@ -71,13 +72,13 @@ export function PurchasesView() {
         );
       },
     },
-    { key: "godown", header: "Deliver to", width: "90px", cell: (p) => godown(p.godownId).short },
-    { key: "items", header: "Items", width: "140px", cell: (p) => <span className="text-muted">{linesSummary(p.lines)}</span> },
-    { key: "amount", header: "Amount", width: "110px", align: "right", cell: (p) => <span className="tabular font-semibold">{formatMoney(orderTotal(p.lines))}</span> },
+    { key: "godown", header: "Deliver to", className: "w-[90px]", cell: (p) => godown(p.godownId).short },
+    { key: "items", header: "Items", className: "w-[150px] whitespace-nowrap", cell: (p) => <span className="text-muted-foreground">{linesSummary(p.lines)}</span> },
+    { key: "amount", header: "Amount", className: "w-[110px]", align: "right", cell: (p) => <span className="tabular font-semibold">{formatMoney(orderTotal(p.lines))}</span> },
     {
       key: "expected",
       header: "Expected",
-      width: "125px",
+      className: "w-[125px]",
       cell: (p) => {
         const late = isOverdue(p);
         if (p.status === "Received") {
@@ -90,7 +91,7 @@ export function PurchasesView() {
         }
         return (
           <>
-            <div className={cn(late && "text-bad")}>{formatDate(p.expected)}</div>
+            <div className={cn(late && "text-danger")}>{formatDate(p.expected)}</div>
             <Sub>{late ? "Past expected date" : "Expected"}</Sub>
           </>
         );
@@ -99,21 +100,21 @@ export function PurchasesView() {
     {
       key: "status",
       header: "Status",
-      width: "100px",
+      className: "w-[100px]",
       cell: (p) => {
         const b = purchaseBadge(p);
-        return <Badge tone={b.tone}>{b.label}</Badge>;
+        return <StatusBadge tone={b.tone}>{b.label}</StatusBadge>;
       },
     },
     {
       key: "actions",
       header: "Actions",
-      width: "140px",
+      className: "w-[140px]",
       align: "right",
       cell: (p) => (
         <div className="flex justify-end gap-1.5">
           {p.status === "Pending" && (
-            <Button size="sm" variant="dark" onClick={() => receivePurchase(p.id)}>
+            <Button size="sm" onClick={() => receivePurchase(p.id)}>
               Receive
             </Button>
           )}
@@ -138,7 +139,7 @@ export function PurchasesView() {
         <StatCard label="Received in November" value={formatMoney(receivedThisMonth)} sub="Goods booked into stock" />
       </StatGrid>
 
-      <Card>
+      <Panel>
         <Toolbar>
           <FilterChips
             label="Filter by status"
@@ -149,7 +150,7 @@ export function PurchasesView() {
           <SearchInput label="Search purchase orders" placeholder="Search PO, supplier or item" value={query} onChange={setQuery} />
         </Toolbar>
         <DataTable columns={columns} rows={rows} rowKey={(p) => p.id} empty="No purchase orders match these filters." />
-      </Card>
+      </Panel>
     </>
   );
 }

@@ -1,11 +1,12 @@
 "use client";
 
 import { useUI } from "@/components/providers/ui-provider";
-import { Badge } from "@/components/ui/badge";
-import { LinkButton } from "@/components/ui/button";
-import { Card, CardHeader, CardRow, EmptyState, Sub } from "@/components/ui/card";
-import { RankList } from "@/components/ui/charts";
-import { StatCard, StatGrid } from "@/components/ui/stat";
+import { RankList } from "@/components/shared/charts";
+import { Sub } from "@/components/shared/data-table";
+import { Panel, PanelHeader, PanelRow, EmptyNote } from "@/components/shared/panel";
+import { RecordLink } from "@/components/shared/record-link";
+import { StatCard, StatGrid } from "@/components/shared/stat";
+import { StatusBadge } from "@/components/shared/status-badge";
 import { TODAY } from "@/lib/constants";
 import { downloadCsv } from "@/lib/csv";
 import { formatCompactMoney, formatDate, formatMoney, formatNumber, percent, plural } from "@/lib/format";
@@ -56,29 +57,29 @@ export function PurchaseReport({ state, period }: { state: InventoryState; perio
       </StatGrid>
 
       <div className="grid items-start gap-4" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(min(340px, 100%), 1fr))" }}>
-        <Card className="pb-3">
-          <CardHeader title="Purchases by supplier" subtitle="PO value incl. GST in the period" />
-          {ranked.length === 0 && <EmptyState>No purchase orders in this period.</EmptyState>}
+        <Panel className="pb-3">
+          <PanelHeader title="Purchases by supplier" description="PO value incl. GST in the period" />
+          {ranked.length === 0 && <EmptyNote>No purchase orders in this period.</EmptyNote>}
           <RankList
             data={ranked.map(([id, v]) => {
               const s = findSupplier(state, id);
               return { key: id, label: s.name, value: formatMoney(v.value), share: percent(v.value, ranked[0][1].value), sub: `${plural(v.count, "PO")} · lead time ${s.leadDays} days` };
             })}
           />
-        </Card>
-        <Card>
-          <CardHeader title="Purchase register" subtitle="Orders raised in the period" action={<ExportButton onExport={exportCsv} />} />
-          {orders.length === 0 && <EmptyState>No purchase orders in this period.</EmptyState>}
+        </Panel>
+        <Panel>
+          <PanelHeader title="Purchase register" description="Orders raised in the period" action={<ExportButton onExport={exportCsv} />} />
+          {orders.length === 0 && <EmptyNote>No purchase orders in this period.</EmptyNote>}
           {orders.map((p) => {
             const b = purchaseBadge(p);
             return (
-              <CardRow key={p.id} className="py-3">
+              <PanelRow key={p.id} className="py-3">
                 <div className="min-w-0 flex-1">
                   <div className="truncate">
-                    <LinkButton className="tabular" onClick={() => openDrawer({ type: "purchase", id: p.id })}>
+                    <RecordLink className="tabular" onClick={() => openDrawer({ type: "purchase", id: p.id })}>
                       {p.id}
-                    </LinkButton>{" "}
-                    <span className="text-muted">· {findSupplier(state, p.supplierId).name}</span>
+                    </RecordLink>{" "}
+                    <span className="text-muted-foreground">· {findSupplier(state, p.supplierId).name}</span>
                   </div>
                   <Sub>
                     {formatDate(p.date)} · {timing(p)}
@@ -86,12 +87,12 @@ export function PurchaseReport({ state, period }: { state: InventoryState; perio
                 </div>
                 <div className="flex flex-col items-end gap-1">
                   <span className="tabular font-semibold">{formatMoney(orderTotal(p.lines))}</span>
-                  <Badge tone={b.tone}>{b.label}</Badge>
+                  <StatusBadge tone={b.tone}>{b.label}</StatusBadge>
                 </div>
-              </CardRow>
+              </PanelRow>
             );
           })}
-        </Card>
+        </Panel>
       </div>
     </>
   );

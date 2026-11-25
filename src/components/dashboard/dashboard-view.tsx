@@ -1,16 +1,16 @@
 "use client";
 
-import { Card, CardHeader } from "@/components/ui/card";
-import { ColumnChart } from "@/components/ui/charts";
-import { Progress } from "@/components/ui/progress";
-import { KpiTile, StatGrid } from "@/components/ui/stat";
+import { SalesBarChart } from "@/components/shared/charts";
+import { Meter } from "@/components/shared/meter";
+import { Eyebrow } from "@/components/shared/page-header";
+import { Panel, PanelHeader } from "@/components/shared/panel";
+import { KpiTile, StatGrid } from "@/components/shared/stat";
 import { GODOWNS, TODAY } from "@/lib/constants";
-import { addDays, formatCompactMoney, formatDate, formatMoney, formatNumber, percent } from "@/lib/format";
+import { addDays, formatCompactMoney, formatDate, formatNumber, percent } from "@/lib/format";
 import {
   confirmedSales,
   isOverdue,
   lowStockItems,
-  orderTotal,
   pendingPurchases,
   stockValue,
   totalQty,
@@ -26,10 +26,10 @@ export function DashboardView() {
     <>
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="mb-1.5 text-xs font-semibold tracking-[0.08em] text-muted uppercase">Welcome back, Arjun</p>
-          <h1 className="text-[26px] leading-tight font-[650] tracking-[-0.02em]">Here’s where your stock stands today</h1>
+          <Eyebrow>Welcome back, Arjun</Eyebrow>
+          <h1 className="text-[26px] leading-tight font-semibold tracking-tight">Here’s where your stock stands today</h1>
         </div>
-        <p className="text-[13.5px] text-muted">Every sale, receipt and transfer updates these numbers instantly.</p>
+        <p className="text-[13.5px] text-muted-foreground">Every sale, receipt and transfer updates these numbers instantly.</p>
       </header>
 
       <Kpis state={state} />
@@ -88,7 +88,7 @@ function Kpis({ state }: { state: InventoryState }) {
 
 function SalesTrend({ state }: { state: InventoryState }) {
   const days = Array.from({ length: 14 }, (_, k) => addDays(TODAY, k - 13));
-  const values = days.map((d) => state.sales.filter((o) => o.date === d).reduce((s, o) => s + orderTotal(o.lines), 0));
+  const values = days.map((d) => totalValue(state.sales.filter((o) => o.date === d)));
   const total = values.reduce((a, b) => a + b, 0);
   const orders = state.sales.filter((o) => o.date >= days[0]).length;
 
@@ -96,38 +96,38 @@ function SalesTrend({ state }: { state: InventoryState }) {
   const byGodown = GODOWNS.map((g) => ({ g, value: state.items.reduce((s, i) => s + i.stock[g.id] * i.cost, 0) }));
 
   return (
-    <Card className="flex flex-col">
-      <CardHeader
+    <Panel>
+      <PanelHeader
         title="Sales booked · last 14 days"
-        subtitle={`Order value incl. GST · peak day ${formatCompactMoney(Math.max(...values))}`}
+        description={`Order value incl. GST · peak day ${formatCompactMoney(Math.max(...values))}`}
         action={
           <div className="text-right">
-            <div className="tabular text-xl font-[650] whitespace-nowrap">{formatCompactMoney(total)}</div>
-            <div className="mt-0.5 text-[12.5px] text-muted">{orders} orders</div>
+            <div className="tabular text-xl font-semibold whitespace-nowrap">{formatCompactMoney(total)}</div>
+            <div className="mt-0.5 text-[12.5px] text-muted-foreground">{orders} orders</div>
           </div>
         }
       />
-      <div className="px-5 pt-2">
-        <ColumnChart
+      <div className="px-3">
+        <SalesBarChart
           data={days.map((d, k) => ({
             key: d,
             value: values[k],
             label: String(parseInt(d.slice(8), 10)),
-            tooltip: `${formatDate(d)} · ${formatMoney(values[k])}`,
+            title: formatDate(d, true),
             highlight: d === TODAY,
           }))}
         />
       </div>
-      <div className="mt-3 grid grid-cols-3 gap-3 border-t border-line-soft px-5 pt-[18px] pb-5">
+      <div className="mt-3 grid grid-cols-3 gap-3 border-t px-5 pt-4 pb-5">
         {byGodown.map(({ g, value }) => (
           <div key={g.id} className="min-w-0">
-            <div className="truncate text-[12.5px] text-muted">{g.name}</div>
-            <div className="tabular mt-1 mb-2 text-base font-[650]">{formatCompactMoney(value)}</div>
-            <Progress value={percent(value, invValue)} />
-            <div className="mt-0.5 text-[12.5px] text-muted">{Math.round(percent(value, invValue))}% of stock value</div>
+            <div className="truncate text-[12.5px] text-muted-foreground">{g.name}</div>
+            <div className="tabular mt-1 mb-2 text-base font-semibold">{formatCompactMoney(value)}</div>
+            <Meter value={percent(value, invValue)} label={`${g.name} share of stock value`} />
+            <div className="mt-1 text-[12.5px] text-muted-foreground">{Math.round(percent(value, invValue))}% of stock value</div>
           </div>
         ))}
       </div>
-    </Card>
+    </Panel>
   );
 }

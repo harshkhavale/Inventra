@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import { useUI } from "@/components/providers/ui-provider";
-import { Badge } from "@/components/ui/badge";
-import { Button, LinkButton } from "@/components/ui/button";
-import { Card, Sub } from "@/components/ui/card";
-import { DataTable, type Column } from "@/components/ui/data-table";
-import { FilterChips, SearchInput, Toolbar } from "@/components/ui/filters";
-import { StatCard, StatGrid } from "@/components/ui/stat";
+import { DataTable, Sub, type Column } from "@/components/shared/data-table";
+import { FilterChips, SearchInput, Toolbar } from "@/components/shared/filters";
+import { Panel } from "@/components/shared/panel";
+import { RecordLink } from "@/components/shared/record-link";
+import { StatCard, StatGrid } from "@/components/shared/stat";
+import { StatusBadge } from "@/components/shared/status-badge";
+import { Button } from "@/components/ui/button";
 import { useCommands } from "@/hooks/use-commands";
 import { matches, useUrlFilter } from "@/hooks/use-url-filter";
 import { godown, TODAY } from "@/lib/constants";
@@ -40,12 +41,12 @@ export function SalesView() {
     {
       key: "id",
       header: "Order",
-      width: "120px",
+      className: "w-[120px]",
       cell: (o) => (
         <>
-          <LinkButton className="tabular" onClick={() => openDrawer({ type: "sale", id: o.id })}>
+          <RecordLink className="tabular" onClick={() => openDrawer({ type: "sale", id: o.id })}>
             {o.id}
-          </LinkButton>
+          </RecordLink>
           <Sub>{formatDate(o.date, true)}</Sub>
         </>
       ),
@@ -53,7 +54,7 @@ export function SalesView() {
     {
       key: "customer",
       header: "Customer",
-      width: "minmax(200px, 1.5fr)",
+      className: "min-w-[200px]",
       cell: (o) => {
         const c = findCustomer(state, o.customerId);
         return (
@@ -64,16 +65,16 @@ export function SalesView() {
         );
       },
     },
-    { key: "godown", header: "Godown", width: "100px", cell: (o) => godown(o.godownId).short },
-    { key: "items", header: "Items", width: "140px", cell: (o) => <span className="text-muted">{linesSummary(o.lines)}</span> },
-    { key: "amount", header: "Amount", width: "120px", align: "right", cell: (o) => <span className="tabular font-semibold">{formatMoney(orderTotal(o.lines))}</span> },
+    { key: "godown", header: "Godown", className: "w-[100px]", cell: (o) => godown(o.godownId).short },
+    { key: "items", header: "Items", className: "w-[150px] whitespace-nowrap", cell: (o) => <span className="text-muted-foreground">{linesSummary(o.lines)}</span> },
+    { key: "amount", header: "Amount", className: "w-[120px]", align: "right", cell: (o) => <span className="tabular font-semibold">{formatMoney(orderTotal(o.lines))}</span> },
     {
       key: "status",
       header: "Status",
-      width: "150px",
+      className: "w-[150px]",
       cell: (o) => (
         <>
-          <Badge tone={saleTone[o.status]}>{o.status}</Badge>
+          <StatusBadge tone={saleTone[o.status]}>{o.status}</StatusBadge>
           <Sub className="tabular">{o.invoice || "Not invoiced"}</Sub>
         </>
       ),
@@ -81,17 +82,17 @@ export function SalesView() {
     {
       key: "actions",
       header: "Actions",
-      width: "170px",
+      className: "w-[170px]",
       align: "right",
       cell: (o) => (
         <div className="flex justify-end gap-1.5">
           {o.status === "Confirmed" && (
-            <Button size="sm" variant="dark" onClick={() => dispatchSale(o.id)}>
+            <Button size="sm" onClick={() => dispatchSale(o.id)}>
               Dispatch
             </Button>
           )}
           {o.status === "Dispatched" && (
-            <Button size="sm" onClick={() => markSalePaid(o.id)}>
+            <Button variant="outline" size="sm" onClick={() => markSalePaid(o.id)}>
               Mark paid
             </Button>
           )}
@@ -111,7 +112,7 @@ export function SalesView() {
         <StatCard label="Collected in November" value={formatMoney(collected)} sub="Payments recorded this month" />
       </StatGrid>
 
-      <Card>
+      <Panel>
         <Toolbar>
           <FilterChips
             label="Filter by status"
@@ -126,7 +127,7 @@ export function SalesView() {
           <SearchInput label="Search sales orders" placeholder="Search order, invoice or customer" value={query} onChange={setQuery} />
         </Toolbar>
         <DataTable columns={columns} rows={rows} rowKey={(o) => o.id} empty="No orders match these filters." />
-      </Card>
+      </Panel>
     </>
   );
 }

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 
 export function ExportButton({ onExport }: { onExport: () => void }) {
   return (
-    <Button size="sm" onClick={onExport}>
+    <Button variant="outline" size="sm" onClick={onExport}>
       <Download aria-hidden className="size-3.5" /> Export CSV
     </Button>
   );

@@ -1,15 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Card, Sub } from "@/components/ui/card";
-import { DataTable, type Column } from "@/components/ui/data-table";
-import { SearchInput, Segmented, Toolbar } from "@/components/ui/filters";
-import { PageHeader } from "@/components/ui/page-header";
+import { DataTable, Sub, type Column } from "@/components/shared/data-table";
+import { SearchInput, ViewTabs, Toolbar } from "@/components/shared/filters";
+import { PageHeader } from "@/components/shared/page-header";
+import { Panel } from "@/components/shared/panel";
 import { matches } from "@/hooks/use-url-filter";
-import { cn } from "@/lib/cn";
 import { formatDate, formatMoney, initials } from "@/lib/format";
 import { pendingPurchases, totalValue } from "@/lib/selectors";
 import type { Customer, InventoryState, Supplier } from "@/lib/types";
+import { cn } from "@/lib/utils";
 import { useInventory } from "@/store/inventory-store";
 
 type Tab = "customers" | "suppliers";
@@ -22,7 +22,7 @@ function Avatar({ name, tone }: { name: string; tone: "blue" | "gray" }) {
       aria-hidden
       className={cn(
         "flex size-[34px] shrink-0 items-center justify-center rounded-[10px] text-[12.5px] font-bold",
-        tone === "blue" ? "bg-info-bg text-info" : "bg-[#f0f2f5] text-body",
+        tone === "blue" ? "bg-info-soft text-info" : "bg-[#f0f2f5] text-secondary-foreground",
       )}
     >
       {initials(name)}
@@ -35,7 +35,7 @@ function contactColumns<T extends Customer>(): Column<T>[] {
     {
       key: "contact",
       header: "Contact",
-      width: "180px",
+      className: "w-[180px]",
       cell: (c) => (
         <>
           <div>{c.contact}</div>
@@ -43,7 +43,7 @@ function contactColumns<T extends Customer>(): Column<T>[] {
         </>
       ),
     },
-    { key: "gst", header: "GSTIN", width: "170px", cell: (c) => <span className="tabular text-[13px] text-muted">{c.gstin}</span> },
+    { key: "gst", header: "GSTIN", className: "w-[170px]", cell: (c) => <span className="tabular text-[13px] text-muted-foreground">{c.gstin}</span> },
   ];
 }
 
@@ -62,7 +62,7 @@ export function DirectoryView() {
         title="Customers & suppliers"
         description="Balances are calculated live from orders and invoices."
         actions={
-          <Segmented
+          <ViewTabs
             label="Party type"
             value={tab}
             onChange={setTab}
@@ -73,15 +73,15 @@ export function DirectoryView() {
           />
         }
       />
-      <Card>
+      <Panel>
         <Toolbar>
-          <div className="text-[12.5px] text-muted">
+          <div className="text-[12.5px] text-muted-foreground">
             {tab === "customers" ? `${formatMoney(receivable)} receivable from customers` : `${formatMoney(onOrder)} on order with suppliers`}
           </div>
           <SearchInput label="Search parties" placeholder="Search name, city or GSTIN" value={query} onChange={setQuery} />
         </Toolbar>
         {tab === "customers" ? <CustomersTable state={state} query={query} /> : <SuppliersTable state={state} query={query} />}
-      </Card>
+      </Panel>
     </>
   );
 }
@@ -105,7 +105,7 @@ function CustomersTable({ state, query }: { state: InventoryState; query: string
     {
       key: "name",
       header: "Customer",
-      width: "minmax(220px, 1.6fr)",
+      className: "min-w-[220px]",
       cell: (c) => (
         <div className="flex items-center gap-3">
           <Avatar name={c.name} tone="blue" />
@@ -117,16 +117,16 @@ function CustomersTable({ state, query }: { state: InventoryState; query: string
       ),
     },
     ...contactColumns<Row>(),
-    { key: "orders", header: "Orders", width: "70px", align: "right", cell: (c) => <span className="tabular">{c.orders}</span> },
-    { key: "billed", header: "Billed", width: "120px", align: "right", cell: (c) => <span className="tabular">{formatMoney(c.billed)}</span> },
+    { key: "orders", header: "Orders", className: "w-[70px]", align: "right", cell: (c) => <span className="tabular">{c.orders}</span> },
+    { key: "billed", header: "Billed", className: "w-[120px]", align: "right", cell: (c) => <span className="tabular">{formatMoney(c.billed)}</span> },
     {
       key: "out",
       header: "Outstanding",
-      width: "130px",
+      className: "w-[130px]",
       align: "right",
-      cell: (c) => <span className={cn("tabular", c.outstanding ? "font-semibold text-warn-text" : "text-muted")}>{c.outstanding ? formatMoney(c.outstanding) : "—"}</span>,
+      cell: (c) => <span className={cn("tabular", c.outstanding ? "font-semibold text-warning-fill" : "text-muted-foreground")}>{c.outstanding ? formatMoney(c.outstanding) : "—"}</span>,
     },
-    { key: "last", header: "Last order", width: "110px", align: "right", cell: (c) => <span className="text-muted">{formatDate(c.last)}</span> },
+    { key: "last", header: "Last order", className: "w-[110px]", align: "right", cell: (c) => <span className="text-muted-foreground">{formatDate(c.last)}</span> },
   ];
 
   return <DataTable columns={columns} rows={rows} rowKey={(c) => c.id} empty="Nobody matches that search." />;
@@ -152,7 +152,7 @@ function SuppliersTable({ state, query }: { state: InventoryState; query: string
     {
       key: "name",
       header: "Supplier",
-      width: "minmax(220px, 1.6fr)",
+      className: "min-w-[220px]",
       cell: (s) => (
         <div className="flex items-center gap-3">
           <Avatar name={s.name} tone="gray" />
@@ -166,10 +166,10 @@ function SuppliersTable({ state, query }: { state: InventoryState; query: string
       ),
     },
     ...contactColumns<Row>(),
-    { key: "orders", header: "POs", width: "70px", align: "right", cell: (s) => <span className="tabular">{s.orders}</span> },
-    { key: "purchased", header: "Purchased", width: "120px", align: "right", cell: (s) => <span className="tabular">{formatMoney(s.purchased)}</span> },
-    { key: "on", header: "On order", width: "130px", align: "right", cell: (s) => <span className={cn("tabular", !s.onOrder && "text-muted")}>{s.onOrder ? formatMoney(s.onOrder) : "—"}</span> },
-    { key: "lead", header: "Lead time", width: "110px", align: "right", cell: (s) => <span className="text-muted">{s.leadDays} days</span> },
+    { key: "orders", header: "POs", className: "w-[70px]", align: "right", cell: (s) => <span className="tabular">{s.orders}</span> },
+    { key: "purchased", header: "Purchased", className: "w-[120px]", align: "right", cell: (s) => <span className="tabular">{formatMoney(s.purchased)}</span> },
+    { key: "on", header: "On order", className: "w-[130px]", align: "right", cell: (s) => <span className={cn("tabular", !s.onOrder && "text-muted-foreground")}>{s.onOrder ? formatMoney(s.onOrder) : "—"}</span> },
+    { key: "lead", header: "Lead time", className: "w-[110px]", align: "right", cell: (s) => <span className="text-muted-foreground">{s.leadDays} days</span> },
   ];
 
   return <DataTable columns={columns} rows={rows} rowKey={(s) => s.id} empty="Nobody matches that search." />;

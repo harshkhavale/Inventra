@@ -1,8 +1,8 @@
 "use client";
 
-import { Card, CardHeader, EmptyState } from "@/components/ui/card";
-import { ColumnChart, RankList, type ColumnDatum } from "@/components/ui/charts";
-import { StatCard, StatGrid } from "@/components/ui/stat";
+import { SalesBarChart, RankList, type ColumnDatum } from "@/components/shared/charts";
+import { Panel, PanelHeader, EmptyNote } from "@/components/shared/panel";
+import { StatCard, StatGrid } from "@/components/shared/stat";
 import { TODAY } from "@/lib/constants";
 import { downloadCsv } from "@/lib/csv";
 import { addDays, formatCompactMoney, formatDate, formatMoney, formatNumber, percent, plural } from "@/lib/format";
@@ -25,7 +25,7 @@ function buckets(state: InventoryState, period: Period): ColumnDatum[] {
       key: start,
       value,
       label,
-      tooltip: `${step === 1 ? formatDate(start) : `Week of ${formatDate(start)}`} · ${formatMoney(value)}`,
+      title: step === 1 ? formatDate(start, true) : `Week of ${formatDate(start)}`,
       highlight: step === 1 && start === TODAY,
     };
   });
@@ -69,31 +69,31 @@ export function SalesReport({ state, period }: { state: InventoryState; period: 
         <StatCard label="Units sold" value={formatNumber(unitsSold)} sub="Dispatched from godowns" />
       </StatGrid>
 
-      <Card>
-        <CardHeader
+      <Panel>
+        <PanelHeader
           title="Sales booked over time"
-          subtitle={`${period.days === 90 ? "Weekly" : "Daily"} order value incl. GST · hover a bar for the figure`}
+          description={`${period.days === 90 ? "Weekly" : "Daily"} order value incl. GST · hover a bar for the figure`}
           action={<ExportButton onExport={exportCsv} />}
         />
         <div className="px-5 pt-2 pb-5">
-          <ColumnChart data={buckets(state, period)} height={250} gap={4} />
+          <SalesBarChart data={buckets(state, period)} height={250} />
         </div>
-      </Card>
+      </Panel>
 
       <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(min(340px, 100%), 1fr))" }}>
-        <Card className="pb-3">
-          <CardHeader title="Top items" subtitle="By sales value before GST" />
-          {topItems.length === 0 && <EmptyState>No sales in this period.</EmptyState>}
+        <Panel className="pb-3">
+          <PanelHeader title="Top items" description="By sales value before GST" />
+          {topItems.length === 0 && <EmptyNote>No sales in this period.</EmptyNote>}
           <RankList
             data={topItems.map(([sku, v]) => {
               const item = findItem(state, sku);
               return { key: sku, label: item.name, value: formatMoney(v.value), share: percent(v.value, topItems[0][1].value), sub: `${formatNumber(v.qty)} ${item.unit} sold` };
             })}
           />
-        </Card>
-        <Card className="pb-3">
-          <CardHeader title="Top customers" subtitle="By order value incl. GST" />
-          {topCustomers.length === 0 && <EmptyState>No sales in this period.</EmptyState>}
+        </Panel>
+        <Panel className="pb-3">
+          <PanelHeader title="Top customers" description="By order value incl. GST" />
+          {topCustomers.length === 0 && <EmptyNote>No sales in this period.</EmptyNote>}
           <RankList
             data={topCustomers.map(([id, v]) => ({
               key: id,
@@ -103,7 +103,7 @@ export function SalesReport({ state, period }: { state: InventoryState; period: 
               sub: plural(v.count, "order"),
             }))}
           />
-        </Card>
+        </Panel>
       </div>
     </>
   );

@@ -2,20 +2,20 @@
 
 import { useState } from "react";
 import { useUI } from "@/components/providers/ui-provider";
-import { Badge } from "@/components/ui/badge";
-import { LinkButton } from "@/components/ui/button";
-import { Card, Sub } from "@/components/ui/card";
-import { DataTable, type Column } from "@/components/ui/data-table";
-import { Select } from "@/components/ui/field";
-import { FilterChips, SearchInput, Segmented, Toolbar } from "@/components/ui/filters";
-import { PageHeader } from "@/components/ui/page-header";
+import { OptionSelect } from "@/components/overlays/selects";
+import { DataTable, Sub, type Column } from "@/components/shared/data-table";
+import { FilterChips, SearchInput, ViewTabs, Toolbar } from "@/components/shared/filters";
+import { PageHeader } from "@/components/shared/page-header";
+import { Panel } from "@/components/shared/panel";
+import { RecordLink } from "@/components/shared/record-link";
+import { StatusBadge } from "@/components/shared/status-badge";
 import { matches, useUrlFilter } from "@/hooks/use-url-filter";
 import { CATEGORIES, godown, GODOWNS } from "@/lib/constants";
-import { cn } from "@/lib/cn";
 import { formatCompactMoney, formatDateTime, formatMoney, formatNumber, formatSigned } from "@/lib/format";
 import { findItem, stockLevel, stockValue, totalQty } from "@/lib/selectors";
 import { movementTone, stockBadge } from "@/lib/status";
 import type { Category, InventoryState, Item, StockMovement } from "@/lib/types";
+import { cn } from "@/lib/utils";
 import { useInventory } from "@/store/inventory-store";
 
 const TABS = ["items", "history"] as const;
@@ -33,7 +33,7 @@ export function StockView() {
         title="Stock"
         description={`${state.items.length} SKUs · ${formatNumber(units)} units · ${formatCompactMoney(stockValue(state.items))} at cost`}
         actions={
-          <Segmented
+          <ViewTabs
             label="Stock view"
             value={tab}
             onChange={setTab}
@@ -75,40 +75,40 @@ function ItemsTable({ state }: { state: InventoryState }) {
     {
       key: "item",
       header: "Item",
-      width: "minmax(220px, 2fr)",
+      className: "min-w-[220px]",
       cell: (i) => (
         <>
-          <LinkButton onClick={() => openDrawer({ type: "item", sku: i.sku })}>{i.name}</LinkButton>
+          <RecordLink onClick={() => openDrawer({ type: "item", sku: i.sku })}>{i.name}</RecordLink>
           <Sub className="tabular">
             {i.sku} · per {i.unit}
           </Sub>
         </>
       ),
     },
-    { key: "cat", header: "Category", width: "120px", cell: (i) => <span className="text-muted">{i.category}</span> },
+    { key: "cat", header: "Category", className: "w-[120px]", cell: (i) => <span className="text-muted-foreground">{i.category}</span> },
     ...GODOWNS.map<Column<Item>>((g) => ({
       key: g.id,
       header: g.short,
-      width: "80px",
+      className: "w-[80px]",
       align: "right",
-      cell: (i) => <span className={cn("tabular", i.stock[g.id] === 0 && "text-faint")}>{formatNumber(i.stock[g.id])}</span>,
+      cell: (i) => <span className={cn("tabular", i.stock[g.id] === 0 && "text-muted-foreground/60")}>{formatNumber(i.stock[g.id])}</span>,
     })),
-    { key: "total", header: "Total", width: "80px", align: "right", cell: (i) => <span className="tabular font-[650]">{formatNumber(totalQty(i))}</span> },
-    { key: "min", header: "Min", width: "60px", align: "right", cell: (i) => <span className="tabular text-muted">{formatNumber(i.minLevel)}</span> },
+    { key: "total", header: "Total", className: "w-[80px]", align: "right", cell: (i) => <span className="tabular font-semibold">{formatNumber(totalQty(i))}</span> },
+    { key: "min", header: "Min", className: "w-[60px]", align: "right", cell: (i) => <span className="tabular text-muted-foreground">{formatNumber(i.minLevel)}</span> },
     {
       key: "status",
       header: "Status",
-      width: "120px",
+      className: "w-[120px]",
       cell: (i) => {
         const b = stockBadge[stockLevel(i)];
-        return <Badge tone={b.tone}>{b.label}</Badge>;
+        return <StatusBadge tone={b.tone}>{b.label}</StatusBadge>;
       },
     },
-    { key: "value", header: "Value", width: "110px", align: "right", cell: (i) => <span className="tabular">{formatMoney(totalQty(i) * i.cost)}</span> },
+    { key: "value", header: "Value", className: "w-[110px]", align: "right", cell: (i) => <span className="tabular">{formatMoney(totalQty(i) * i.cost)}</span> },
   ];
 
   return (
-    <Card>
+    <Panel>
       <Toolbar>
         <div className="flex flex-wrap items-center gap-2">
           <FilterChips
@@ -117,24 +117,18 @@ function ItemsTable({ state }: { state: InventoryState }) {
             onChange={setLevel}
             options={LEVELS.map((f) => ({ key: f, label: LEVEL_LABEL[f], count: state.items.filter((i) => inLevel(i, f) && search(i)).length }))}
           />
-          <Select
+          <OptionSelect
             aria-label="Category"
-            className="min-h-[34px] w-auto rounded-full text-[13px]"
+            className="h-8 w-auto rounded-full text-[13px]"
             value={category}
-            onChange={(e) => setCategory(e.target.value as Category | "all")}
-          >
-            <option value="all">All categories</option>
-            {CATEGORIES.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </Select>
+            onChange={setCategory}
+            options={[{ value: "all", label: "All categories" }, ...CATEGORIES.map((c) => ({ value: c, label: c }))]}
+          />
         </div>
         <SearchInput label="Search items" placeholder="Search item name or SKU" value={query} onChange={setQuery} />
       </Toolbar>
       <DataTable columns={columns} rows={rows} rowKey={(i) => i.sku} empty="No items match these filters." />
-    </Card>
+    </Panel>
   );
 }
 
@@ -161,32 +155,32 @@ function HistoryTable({ state }: { state: InventoryState }) {
     .slice(0, HISTORY_LIMIT);
 
   const columns: Column<MovementRow>[] = [
-    { key: "when", header: "When", width: "160px", cell: (m) => <span className="text-muted">{formatDateTime(m.at)}</span> },
+    { key: "when", header: "When", className: "w-[160px]", cell: (m) => <span className="text-muted-foreground">{formatDateTime(m.at)}</span> },
     {
       key: "item",
       header: "Item",
-      width: "minmax(240px, 2fr)",
+      className: "min-w-[240px]",
       cell: (m) => (
         <>
-          <LinkButton onClick={() => openDrawer({ type: "item", sku: m.sku })}>{findItem(state, m.sku).name}</LinkButton>
+          <RecordLink onClick={() => openDrawer({ type: "item", sku: m.sku })}>{findItem(state, m.sku).name}</RecordLink>
           <Sub className="tabular">{m.sku}</Sub>
         </>
       ),
     },
-    { key: "godown", header: "Godown", width: "110px", cell: (m) => godown(m.godownId).short },
-    { key: "type", header: "Movement", width: "130px", cell: (m) => <Badge tone={movementTone[m.type]}>{m.type}</Badge> },
-    { key: "ref", header: "Reference", width: "120px", cell: (m) => <span className="tabular text-muted">{m.ref}</span> },
+    { key: "godown", header: "Godown", className: "w-[110px]", cell: (m) => godown(m.godownId).short },
+    { key: "type", header: "Movement", className: "w-[130px]", cell: (m) => <StatusBadge tone={movementTone[m.type]}>{m.type}</StatusBadge> },
+    { key: "ref", header: "Reference", className: "w-[120px]", cell: (m) => <span className="tabular text-muted-foreground">{m.ref}</span> },
     {
       key: "qty",
       header: "Qty",
-      width: "100px",
+      className: "w-[100px]",
       align: "right",
-      cell: (m) => <span className={cn("tabular font-semibold", m.qty > 0 ? "text-good" : "text-bad")}>{formatSigned(m.qty)}</span>,
+      cell: (m) => <span className={cn("tabular font-semibold", m.qty > 0 ? "text-success" : "text-danger")}>{formatSigned(m.qty)}</span>,
     },
   ];
 
   return (
-    <Card>
+    <Panel>
       <Toolbar>
         <FilterChips
           label="Filter by movement type"
@@ -197,6 +191,6 @@ function HistoryTable({ state }: { state: InventoryState }) {
         <SearchInput label="Search stock movements" placeholder="Search item, SKU or reference" value={query} onChange={setQuery} />
       </Toolbar>
       <DataTable columns={columns} rows={rows} rowKey={(m) => m.key} empty="No movements match." />
-    </Card>
+    </Panel>
   );
 }

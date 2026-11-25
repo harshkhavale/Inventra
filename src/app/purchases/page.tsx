@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { PurchasesView } from "@/components/purchases/purchases-view";
-import { OpenModalButton } from "@/components/ui/open-modal-button";
-import { PageHeader } from "@/components/ui/page-header";
-import { ViewSkeleton } from "@/components/ui/skeleton";
+import { PageHeader } from "@/components/shared/page-header";
+import { OpenModalButton, ViewSkeleton } from "@/components/shared/misc";
 
 export const metadata: Metadata = { title: "Purchases" };
 
