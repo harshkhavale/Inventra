@@ -5,12 +5,11 @@ import { ItemDrawer } from "./item-drawer";
 import { OrderDrawer } from "./order-drawer";
 import { PurchaseForm } from "./purchase-form";
 import { SaleForm } from "./sale-form";
-import { Toast } from "./toast";
 import { TransferForm } from "./transfer-form";
 
-/** Renders whichever drawer, form and toast are currently open. */
+/** Renders whichever detail sheet and form are currently open. */
 export function OverlayRoot() {
-  const { drawer, modal, toast, closeDrawer, closeModal, dismissToast } = useUI();
+  const { drawer, modal, closeDrawer, closeModal } = useUI();
 
   return (
     <>
@@ -21,8 +20,6 @@ export function OverlayRoot() {
       {modal?.type === "sale" && <SaleForm onClose={closeModal} />}
       {modal?.type === "purchase" && <PurchaseForm sku={modal.sku} onClose={closeModal} />}
       {modal?.type === "transfer" && <TransferForm sku={modal.sku} from={modal.from} onClose={closeModal} />}
-
-      {toast && <Toast key={toast.id} toast={toast} onDismiss={dismissToast} />}
     </>
   );
 }

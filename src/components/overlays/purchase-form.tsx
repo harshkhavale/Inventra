@@ -1,17 +1,20 @@
 "use client";
 
 import { useState } from "react";
+import { Totals } from "@/components/shared/misc";
 import { Button } from "@/components/ui/button";
-import { Modal, Totals } from "@/components/ui/dialog";
-import { Field, FormError, Input, Select } from "@/components/ui/field";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import { useCommands } from "@/hooks/use-commands";
-import { GODOWNS, GST_RATE, TODAY } from "@/lib/constants";
+import { GST_RATE, TODAY } from "@/lib/constants";
 import { addDays, formatMoney, formatNumber } from "@/lib/format";
 import { findItem, findSupplier, suggestedReorderQty, totalQty } from "@/lib/selectors";
-import type { GodownId, InventoryState } from "@/lib/types";
+import type { InventoryState } from "@/lib/types";
 import type { LineDraft, PurchaseDraft } from "@/store/commands";
 import { useInventory } from "@/store/inventory-store";
 import { LineEditor } from "./line-editor";
+import { FormDialog } from "./overlay-shells";
+import { GodownSelect, OptionSelect } from "./selects";
 
 /** Blank PO, or a reorder pre-filled for one item with a suggested quantity. */
 function initialDraft(state: InventoryState, sku?: string): PurchaseDraft {
@@ -67,40 +70,32 @@ export function PurchaseForm({ sku, onClose }: { sku?: string; onClose: () => vo
   };
 
   return (
-    <Modal
+    <FormDialog
       eyebrow="Purchase"
       title="New purchase order"
+      description="Stock is added to the delivery godown when you mark the PO received."
       onClose={onClose}
       footer={
         <>
-          <Button onClick={onClose}>Cancel</Button>
-          <Button variant="primary" onClick={submit}>
-            Raise purchase order
+          <Button variant="outline" onClick={onClose}>
+            Cancel
           </Button>
+          <Button onClick={submit}>Raise purchase order</Button>
         </>
       }
     >
-      <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-3">
-        <Field label="Supplier">
-          <Select value={draft.supplierId} onChange={(e) => changeSupplier(e.target.value)}>
-            {state.suppliers.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
-          </Select>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <Field>
+          <FieldLabel htmlFor="po-supplier">Supplier</FieldLabel>
+          <OptionSelect id="po-supplier" value={draft.supplierId} onChange={changeSupplier} options={state.suppliers.map((s) => ({ value: s.id, label: s.name }))} />
         </Field>
-        <Field label="Deliver to">
-          <Select value={draft.godownId} onChange={(e) => patch({ godownId: e.target.value as GodownId })}>
-            {GODOWNS.map((g) => (
-              <option key={g.id} value={g.id}>
-                {g.name}
-              </option>
-            ))}
-          </Select>
+        <Field>
+          <FieldLabel htmlFor="po-godown">Deliver to</FieldLabel>
+          <GodownSelect id="po-godown" value={draft.godownId} onChange={(godownId) => patch({ godownId })} />
         </Field>
-        <Field label="Expected delivery">
-          <Input type="date" min={TODAY} value={draft.expected} onChange={(e) => patch({ expected: e.target.value })} />
+        <Field>
+          <FieldLabel htmlFor="po-expected">Expected delivery</FieldLabel>
+          <Input id="po-expected" type="date" min={TODAY} className="bg-card" value={draft.expected} onChange={(e) => patch({ expected: e.target.value })} />
         </Field>
       </div>
 
@@ -126,7 +121,7 @@ export function PurchaseForm({ sku, onClose }: { sku?: string; onClose: () => vo
       />
 
       <Totals subtotal={formatMoney(sub)} gst={formatMoney(Math.round(sub * GST_RATE))} total={formatMoney(Math.round(sub * (1 + GST_RATE)))} />
-      <FormError>{error}</FormError>
-    </Modal>
+      {error && <FieldError className="rounded-md bg-danger-soft px-3.5 py-2.5">{error}</FieldError>}
+    </FormDialog>
   );
 }

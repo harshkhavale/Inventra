@@ -1,31 +1,12 @@
 "use client";
 
 import { Plus, X } from "lucide-react";
-import { Button, IconButton } from "@/components/ui/button";
-import { Input, Select } from "@/components/ui/field";
-import { CATEGORIES } from "@/lib/constants";
-import { cn } from "@/lib/cn";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import type { Item } from "@/lib/types";
+import { cn } from "@/lib/utils";
 import type { LineDraft } from "@/store/commands";
-
-/** Item picker grouped by category. */
-export function ItemSelect({ items, className, ...props }: { items: Item[] } & React.ComponentProps<"select">) {
-  return (
-    <Select className={className} {...props}>
-      {CATEGORIES.map((cat) => (
-        <optgroup key={cat} label={cat}>
-          {items
-            .filter((i) => i.category === cat)
-            .map((i) => (
-              <option key={i.sku} value={i.sku}>
-                {i.name}
-              </option>
-            ))}
-        </optgroup>
-      ))}
-    </Select>
-  );
-}
+import { ItemSelect } from "./selects";
 
 export interface LineHint {
   text: string;
@@ -57,25 +38,23 @@ export function LineEditor({
   /** The line to append on "Add item", or null when every item is used. */
   nextLine: () => LineDraft | null;
 }) {
-  const grid = withRate
-    ? "grid-cols-[minmax(0,1fr)_88px_100px_96px_36px]"
-    : "grid-cols-[minmax(0,1fr)_100px_110px_36px]";
+  const grid = withRate ? "grid-cols-[minmax(0,1fr)_88px_100px_96px_36px]" : "grid-cols-[minmax(0,1fr)_100px_110px_36px]";
 
-  const update = (idx: number, patch: Partial<LineDraft>) =>
-    onChange(lines.map((l, j) => (j === idx ? { ...l, ...patch } : l)));
-
+  const update = (idx: number, patch: Partial<LineDraft>) => onChange(lines.map((l, j) => (j === idx ? { ...l, ...patch } : l)));
+  const changeSku = (idx: number, sku: string) =>
+    onChange(lines.map((l, j) => (j !== idx ? l : onSkuChange ? onSkuChange(l, sku) : { ...l, sku })));
   const add = () => {
     const next = nextLine();
     if (next) onChange([...lines, next]);
   };
 
   return (
-    <div className="flex flex-col gap-2.5 overflow-x-auto">
-      <div className={cn("grid min-w-[520px] gap-2.5 text-[12.5px] font-semibold text-[#3b4556]", grid)}>
+    <div className="-mx-1 flex flex-col gap-2.5 overflow-x-auto px-1">
+      <div className={cn("grid min-w-[520px] gap-2.5 text-[12.5px] font-medium text-muted-foreground", grid)}>
         <span>Item</span>
         <span>Quantity</span>
         {withRate && <span>Rate (₹)</span>}
-        <span className="justify-self-end">Amount</span>
+        <span className="text-right">Amount</span>
         <span />
       </div>
       {lines.map((l, idx) => {
@@ -83,22 +62,16 @@ export function LineEditor({
         return (
           <div key={idx} className="min-w-[520px]">
             <div className={cn("grid items-center gap-2.5", grid)}>
-              <ItemSelect
-                items={items}
-                aria-label={`Item, line ${idx + 1}`}
-                value={l.sku}
-                onChange={(e) => onChange(lines.map((x, j) => (j === idx ? (onSkuChange ? onSkuChange(x, e.target.value) : { ...x, sku: e.target.value }) : x)))}
-              />
+              <ItemSelect items={items} aria-label={`Item, line ${idx + 1}`} value={l.sku} onChange={(sku) => changeSku(idx, sku)} />
               <Input
                 type="number"
                 inputMode="numeric"
                 min={1}
                 placeholder="0"
                 aria-label={`Quantity, line ${idx + 1}`}
-                className="tabular"
+                className="tabular bg-card"
                 value={l.qty}
                 onChange={(e) => update(idx, { qty: e.target.value })}
-                autoFocus={idx === lines.length - 1 && l.qty === ""}
               />
               {withRate && (
                 <Input
@@ -107,29 +80,29 @@ export function LineEditor({
                   min={0}
                   step={0.5}
                   aria-label={`Rate, line ${idx + 1}`}
-                  className="tabular"
+                  className="tabular bg-card"
                   value={l.rate}
                   onChange={(e) => update(idx, { rate: e.target.value })}
                 />
               )}
-              <span className="tabular justify-self-end font-semibold">{amountOf(l)}</span>
+              <span className="tabular text-right font-semibold">{amountOf(l)}</span>
               {lines.length > 1 ? (
-                <IconButton aria-label={`Remove line ${idx + 1}`} onClick={() => onChange(lines.filter((_, j) => j !== idx))}>
-                  <X className="size-[15px]" />
-                </IconButton>
+                <Button variant="ghost" size="icon" aria-label={`Remove line ${idx + 1}`} onClick={() => onChange(lines.filter((_, j) => j !== idx))}>
+                  <X />
+                </Button>
               ) : (
                 <span />
               )}
             </div>
-            <div className={cn("mt-1 text-[12.5px]", hint.tone === "bad" ? "text-bad" : hint.tone === "warn" ? "text-warn-text" : "text-muted")}>
+            <p className={cn("mt-1 text-[12.5px]", hint.tone === "bad" ? "text-danger" : hint.tone === "warn" ? "text-warning-fill" : "text-muted-foreground")}>
               {hint.text}
-            </div>
+            </p>
           </div>
         );
       })}
       <div>
-        <Button variant="ghost" size="sm" onClick={add} disabled={lines.length >= items.length}>
-          <Plus className="size-3.5" /> Add item
+        <Button variant="ghost" size="sm" className="text-primary hover:text-primary" onClick={add} disabled={lines.length >= items.length}>
+          <Plus /> Add item
         </Button>
       </div>
     </div>

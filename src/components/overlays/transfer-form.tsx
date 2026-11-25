@@ -2,17 +2,18 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Modal } from "@/components/ui/dialog";
-import { Field, FormError, Input, Select } from "@/components/ui/field";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import { useCommands } from "@/hooks/use-commands";
 import { GODOWN_IDS, GODOWNS } from "@/lib/constants";
-import { cn } from "@/lib/cn";
 import { formatNumber } from "@/lib/format";
 import { findItem } from "@/lib/selectors";
 import type { GodownId, InventoryState } from "@/lib/types";
+import { cn } from "@/lib/utils";
 import type { TransferDraft } from "@/store/commands";
 import { useInventory } from "@/store/inventory-store";
-import { ItemSelect } from "./line-editor";
+import { FormDialog } from "./overlay-shells";
+import { GodownSelect, ItemSelect } from "./selects";
 
 /** Default the source to wherever the item is most plentiful. */
 function initialDraft(state: InventoryState, sku?: string, from?: GodownId): TransferDraft {
@@ -40,41 +41,33 @@ export function TransferForm({ sku, from, onClose }: { sku?: string; from?: Godo
   };
 
   return (
-    <Modal
+    <FormDialog
       eyebrow="Godowns"
       title="Transfer stock"
-      width={560}
+      description="Move units of one item from one godown to another."
+      className="sm:max-w-[560px]"
       onClose={onClose}
       footer={
         <>
-          <Button onClick={onClose}>Cancel</Button>
-          <Button variant="primary" onClick={submit}>
-            Move stock
+          <Button variant="outline" onClick={onClose}>
+            Cancel
           </Button>
+          <Button onClick={submit}>Move stock</Button>
         </>
       }
     >
-      <Field label="Item">
-        <ItemSelect items={state.items} value={draft.sku} onChange={(e) => patch({ sku: e.target.value })} />
+      <Field>
+        <FieldLabel htmlFor="tr-item">Item</FieldLabel>
+        <ItemSelect id="tr-item" items={state.items} value={draft.sku} onChange={(s) => patch({ sku: s })} />
       </Field>
-      <div className="grid grid-cols-2 gap-3.5">
-        <Field label="From">
-          <Select value={draft.from} onChange={(e) => patch({ from: e.target.value as GodownId })}>
-            {GODOWNS.map((g) => (
-              <option key={g.id} value={g.id}>
-                {g.name}
-              </option>
-            ))}
-          </Select>
+      <div className="grid grid-cols-2 gap-4">
+        <Field>
+          <FieldLabel htmlFor="tr-from">From</FieldLabel>
+          <GodownSelect id="tr-from" value={draft.from} onChange={(f) => patch({ from: f })} />
         </Field>
-        <Field label="To">
-          <Select value={draft.to} onChange={(e) => patch({ to: e.target.value as GodownId })}>
-            {GODOWNS.map((g) => (
-              <option key={g.id} value={g.id}>
-                {g.name}
-              </option>
-            ))}
-          </Select>
+        <Field>
+          <FieldLabel htmlFor="tr-to">To</FieldLabel>
+          <GodownSelect id="tr-to" value={draft.to} onChange={(t) => patch({ to: t })} />
         </Field>
       </div>
 
@@ -85,34 +78,36 @@ export function TransferForm({ sku, from, onClose }: { sku?: string; from?: Godo
             <div
               key={g.id}
               className={cn(
-                "rounded-[10px] border bg-tint p-3",
-                role === "from" ? "border-brand" : role === "to" ? "border-good-fill" : "border-transparent",
+                "rounded-lg border bg-muted/50 p-3",
+                role === "from" ? "border-primary" : role === "to" ? "border-success-fill" : "border-transparent",
               )}
             >
-              <div className="text-xs text-muted">
+              <div className="text-xs text-muted-foreground">
                 {g.short}
                 {role && ` · ${role}`}
               </div>
-              <div className="tabular mt-0.5 text-lg font-[650]">{formatNumber(item.stock[g.id])}</div>
+              <div className="tabular mt-0.5 text-lg font-semibold">{formatNumber(item.stock[g.id])}</div>
             </div>
           );
         })}
       </div>
 
-      <Field label="Quantity to move">
+      <Field>
+        <FieldLabel htmlFor="tr-qty">Quantity to move</FieldLabel>
         <Input
+          id="tr-qty"
           type="number"
           inputMode="numeric"
           min={1}
           placeholder="0"
-          className="tabular"
+          className="tabular bg-card"
           autoFocus
           value={draft.qty}
           onChange={(e) => patch({ qty: e.target.value })}
           onKeyDown={(e) => e.key === "Enter" && submit()}
         />
       </Field>
-      <FormError>{error}</FormError>
-    </Modal>
+      {error && <FieldError className="rounded-md bg-danger-soft px-3.5 py-2.5">{error}</FieldError>}
+    </FormDialog>
   );
 }

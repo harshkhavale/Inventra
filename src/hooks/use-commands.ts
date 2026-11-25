@@ -1,30 +1,29 @@
 "use client";
 
-import { useUI } from "@/components/providers/ui-provider";
+import { toast } from "sonner";
 import * as commands from "@/store/commands";
 import type { Outcome } from "@/store/commands";
 import { inventoryStore } from "@/store/inventory-store";
 
 /**
- * Binds the pure workflow commands to the store and the toast.
+ * Binds the pure workflow commands to the store and to Sonner toasts.
  *
  * Row actions (dispatch, receive, mark paid) report errors as a toast.
  * Form submissions return the error instead, so the form can show it inline
  * and stay open.
  */
 export function useCommands() {
-  const { notify } = useUI();
-
   const commit = (outcome: Outcome) => {
     if (!outcome.ok) return outcome.error;
     inventoryStore.setState(outcome.state);
-    notify(outcome.message, outcome.tone ?? "success");
+    if (outcome.tone === "error") toast.error(outcome.message);
+    else toast.success(outcome.message);
     return null;
   };
 
   const act = (outcome: Outcome) => {
     const error = commit(outcome);
-    if (error) notify(error, "error");
+    if (error) toast.error(error);
   };
 
   const state = inventoryStore.getState;
@@ -38,7 +37,7 @@ export function useCommands() {
     transferStock: (draft: commands.TransferDraft) => commit(commands.transferStock(state(), draft)),
     resetDemo: () => {
       inventoryStore.reset();
-      notify("Demo data restored to its starting point.");
+      toast.success("Demo data restored to its starting point.");
     },
   };
 }

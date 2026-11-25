@@ -1,17 +1,19 @@
 "use client";
 
 import { Check } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { SectionTitle, Totals } from "@/components/shared/misc";
+import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
-import { Drawer, SectionTitle, Totals } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useCommands } from "@/hooks/use-commands";
 import { godown } from "@/lib/constants";
-import { cn } from "@/lib/cn";
 import { formatDate, formatMoney, formatNumber } from "@/lib/format";
 import { findCustomer, findItem, findSupplier, gst, orderTotal, subtotal } from "@/lib/selectors";
 import { purchaseBadge, saleTone } from "@/lib/status";
-import type { InventoryState, LineItem } from "@/lib/types";
+import type { Godown, InventoryState, LineItem } from "@/lib/types";
+import { cn } from "@/lib/utils";
 import { useInventory } from "@/store/inventory-store";
+import { DetailSheet } from "./overlay-shells";
 
 interface Step {
   label: string;
@@ -19,7 +21,7 @@ interface Step {
   done: boolean;
 }
 
-/** Shared drawer for a sales order or a purchase order. */
+/** Shared detail sheet for a sales order or a purchase order. */
 export function OrderDrawer({ kind, id, onClose }: { kind: "sale" | "purchase"; id: string; onClose: () => void }) {
   const state = useInventory();
   const commands = useCommands();
@@ -27,25 +29,25 @@ export function OrderDrawer({ kind, id, onClose }: { kind: "sale" | "purchase"; 
   if (!view) return null;
 
   return (
-    <Drawer
-      label="Order details"
+    <DetailSheet
       eyebrow={view.kind}
       title={id}
       titleClassName="tabular"
-      badge={<Badge tone={view.badge.tone}>{view.badge.label}</Badge>}
+      description={`${view.kind} ${id} details`}
+      badge={<StatusBadge tone={view.badge.tone}>{view.badge.label}</StatusBadge>}
       onClose={onClose}
     >
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="rounded-[10px] bg-tint p-3.5">
-          <div className="text-xs text-muted">{view.partyLabel}</div>
+        <div className="rounded-lg bg-muted/60 p-3.5">
+          <div className="text-xs text-muted-foreground">{view.partyLabel}</div>
           <div className="mt-1 font-semibold">{view.party.name}</div>
-          <div className="mt-0.5 text-[12.5px] text-muted">{view.party.city}</div>
-          <div className="tabular mt-0.5 text-[12.5px] text-muted">GSTIN {view.party.gstin}</div>
+          <div className="mt-0.5 text-[12.5px] text-muted-foreground">{view.party.city}</div>
+          <div className="tabular mt-0.5 text-[12.5px] text-muted-foreground">GSTIN {view.party.gstin}</div>
         </div>
-        <dl className="flex flex-col gap-1.5 rounded-[10px] bg-tint p-3.5 text-[13px]">
+        <dl className="flex flex-col gap-1.5 rounded-lg bg-muted/60 p-3.5 text-[13px]">
           {view.meta.map((f) => (
             <div key={f.k} className="flex justify-between gap-2.5">
-              <dt className="text-muted">{f.k}</dt>
+              <dt className="text-muted-foreground">{f.k}</dt>
               <dd className="tabular font-semibold">{f.v}</dd>
             </div>
           ))}
@@ -68,14 +70,14 @@ export function OrderDrawer({ kind, id, onClose }: { kind: "sale" | "purchase"; 
               <span
                 className={cn(
                   "flex size-[22px] shrink-0 items-center justify-center rounded-full border-2 text-white",
-                  s.done ? "border-good-fill bg-good-fill" : "border-field bg-white",
+                  s.done ? "border-success-fill bg-success-fill" : "border-input bg-card",
                 )}
               >
                 <Check aria-hidden className="size-3" strokeWidth={3} />
               </span>
               <div>
                 <div className="text-[13.5px] font-semibold">{s.label}</div>
-                <div className="mt-0.5 text-[12.5px] text-muted">{s.detail}</div>
+                <div className="mt-0.5 text-[12.5px] text-muted-foreground">{s.detail}</div>
               </div>
             </li>
           ))}
@@ -83,52 +85,53 @@ export function OrderDrawer({ kind, id, onClose }: { kind: "sale" | "purchase"; 
       </div>
 
       <div className="flex flex-wrap gap-2 pt-1">
-        {view.action && (
-          <Button variant="primary" onClick={view.action.run}>
-            {view.action.label}
-          </Button>
-        )}
-        <Button onClick={onClose}>Close</Button>
+        {view.action && <Button onClick={view.action.run}>{view.action.label}</Button>}
+        <Button variant="outline" onClick={onClose}>
+          Close
+        </Button>
       </div>
-    </Drawer>
+    </DetailSheet>
   );
 }
 
-function LineTable({ state, lines, availabilityAt }: { state: InventoryState; lines: LineItem[]; availabilityAt?: ReturnType<typeof godown> }) {
-  const grid = "grid grid-cols-[1fr_60px_84px_96px] gap-2.5";
+function LineTable({ state, lines, availabilityAt }: { state: InventoryState; lines: LineItem[]; availabilityAt?: Godown }) {
   return (
-    <div className="overflow-x-auto rounded-[10px] border border-line-soft">
-      <div className="min-w-[420px]">
-        <div className={cn(grid, "bg-subtle px-3.5 py-2 text-[11.5px] font-semibold tracking-[0.05em] text-muted uppercase")}>
-          <span>Item</span>
-          <span className="justify-self-end">Qty</span>
-          <span className="justify-self-end">Rate</span>
-          <span className="justify-self-end">Amount</span>
-        </div>
-        {lines.map((l) => {
-          const item = findItem(state, l.sku);
-          const available = availabilityAt ? item.stock[availabilityAt.id] : null;
-          return (
-            <div key={l.sku} className={cn(grid, "items-center border-t border-line-soft px-3.5 py-2.5")}>
-              <div className="min-w-0">
-                <div className="text-[13.5px] font-medium">{item.name}</div>
-                <div className="tabular mt-0.5 text-[12.5px] text-muted">
-                  {l.sku}
-                  {available !== null && (
-                    <span className={available >= l.qty ? "font-semibold text-good" : "text-bad"}>
-                      {" "}
-                      · {available} available at {availabilityAt!.short}
-                    </span>
-                  )}
-                </div>
-              </div>
-              <span className="tabular justify-self-end">{formatNumber(l.qty)}</span>
-              <span className="tabular justify-self-end text-muted">{formatMoney(l.rate)}</span>
-              <span className="tabular justify-self-end font-semibold">{formatMoney(l.qty * l.rate)}</span>
-            </div>
-          );
-        })}
-      </div>
+    <div className="overflow-hidden rounded-lg border">
+      <Table>
+        <TableHeader className="bg-muted/40">
+          <TableRow className="hover:bg-transparent">
+            <TableHead className="pl-3.5 text-[11.5px] font-semibold tracking-wider text-muted-foreground uppercase">Item</TableHead>
+            <TableHead className="text-right text-[11.5px] font-semibold tracking-wider text-muted-foreground uppercase">Qty</TableHead>
+            <TableHead className="text-right text-[11.5px] font-semibold tracking-wider text-muted-foreground uppercase">Rate</TableHead>
+            <TableHead className="pr-3.5 text-right text-[11.5px] font-semibold tracking-wider text-muted-foreground uppercase">Amount</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {lines.map((l) => {
+            const item = findItem(state, l.sku);
+            const available = availabilityAt ? item.stock[availabilityAt.id] : null;
+            return (
+              <TableRow key={l.sku}>
+                <TableCell className="py-2.5 pl-3.5 whitespace-normal">
+                  <div className="text-[13.5px] font-medium">{item.name}</div>
+                  <div className="tabular mt-0.5 text-[12.5px] text-muted-foreground">
+                    {l.sku}
+                    {available !== null && (
+                      <span className={available >= l.qty ? "font-semibold text-success" : "text-danger"}>
+                        {" "}
+                        · {available} available at {availabilityAt!.short}
+                      </span>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell className="tabular text-right">{formatNumber(l.qty)}</TableCell>
+                <TableCell className="tabular text-right text-muted-foreground">{formatMoney(l.rate)}</TableCell>
+                <TableCell className="tabular pr-3.5 text-right font-semibold">{formatMoney(l.qty * l.rate)}</TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
     </div>
   );
 }
