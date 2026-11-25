@@ -23,10 +23,10 @@ export function ViewSkeleton() {
     <div aria-busy="true" aria-label="Loading" className="flex flex-col gap-5">
       <div className="grid gap-3.5 sm:grid-cols-3">
         {[0, 1, 2].map((i) => (
-          <Skeleton key={i} className="h-[104px] rounded-xl bg-card" />
+          <Skeleton key={i} className="h-[104px] rounded-xl bg-muted" />
         ))}
       </div>
-      <Skeleton className="h-[420px] rounded-xl bg-card" />
+      <Skeleton className="h-[420px] rounded-xl bg-muted" />
     </div>
   );
 }
