@@ -57,6 +57,13 @@
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: #1f2638;
   --sidebar-ring: #8fa2ff;
+
+  --scrollbar: #c9ced8;
+}
+
+/* Dark scrollbar thumb inside the navy sidebar. */
+[data-sidebar="sidebar"] {
+  --scrollbar: rgb(255 255 255 / 0.16);
 }
 
 @theme inline {
@@ -118,6 +125,9 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    /* Thin, tinted scrollbars instead of the thick default (notably on Windows). */
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar) transparent;
   }
   body {
     @apply bg-background text-foreground antialiased;

@@ -51,7 +51,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
-      <SidebarHeader className="px-4 pt-5 pb-2">
+      <SidebarHeader className="px-4 pt-5 pb-1">
         <div className="flex items-center gap-3">
           <Logo />
           <div className="min-w-0">
@@ -61,9 +61,9 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent className="gap-1">
         {NAV.map((group) => (
-          <SidebarGroup key={group.group}>
+          <SidebarGroup key={group.group} className="py-1">
             <SidebarGroupLabel className="tracking-[0.08em] text-sidebar-foreground/60 uppercase">{group.group}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
@@ -73,7 +73,7 @@ export function AppSidebar() {
                   const Icon = item.icon;
                   return (
                     <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton asChild isActive={active} className="h-10 font-medium hover:text-white data-[active=true]:font-medium">
+                      <SidebarMenuButton asChild isActive={active} className="h-9 font-medium hover:text-white data-[active=true]:font-medium">
                         <Link href={item.href} onClick={() => isMobile && setOpenMobile(false)}>
                           <Icon className={cn(active && "text-sidebar-ring")} />
                           <span>{item.label}</span>
@@ -82,7 +82,7 @@ export function AppSidebar() {
                       {count > 0 && (
                         <SidebarMenuBadge
                           aria-label={`${count} need attention`}
-                          className={cn("top-2.5 rounded-full", item.badge === "stock" ? "bg-[#5a3a0c] text-[#ffd9a0]" : "bg-[#2e3750] text-[#e4e8f2]")}
+                          className={cn("top-2 rounded-full", item.badge === "stock" ? "bg-[#5a3a0c] text-[#ffd9a0]" : "bg-[#2e3750] text-[#e4e8f2]")}
                         >
                           {count}
                         </SidebarMenuBadge>
