@@ -18,7 +18,8 @@ export function OptionSelect<V extends string>({ value, onChange, options, class
   return (
     <Select value={value} onValueChange={(v) => onChange(v as V)}>
       <SelectTrigger className={cn("w-full bg-card", className)} id={rest.id} aria-label={rest["aria-label"]}>
-        <SelectValue />
+        {/* Explicit label so the value shows before hydration, not after. */}
+        <SelectValue>{options.find((o) => o.value === value)?.label}</SelectValue>
       </SelectTrigger>
       <SelectContent>
         {options.map((o) => (
@@ -40,7 +41,7 @@ export function ItemSelect({ items, value, onChange, className, ...rest }: BaseP
   return (
     <Select value={value} onValueChange={onChange}>
       <SelectTrigger className={cn("w-full min-w-0 bg-card", className)} id={rest.id} aria-label={rest["aria-label"]}>
-        <SelectValue />
+        <SelectValue>{items.find((i) => i.sku === value)?.name}</SelectValue>
       </SelectTrigger>
       <SelectContent>
         {CATEGORIES.map((cat) => (
