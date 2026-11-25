@@ -20,7 +20,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset className="bg-background">
+      <SidebarInset className="min-w-0 bg-background">
         <header className="sticky top-0 z-30 flex flex-wrap items-center justify-between gap-3 border-b bg-card/90 px-4 py-3 backdrop-blur sm:px-8">
           <div className="flex items-center gap-2">
             <SidebarTrigger className="-ml-1" />

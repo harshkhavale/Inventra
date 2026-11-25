@@ -88,5 +88,5 @@ export function ViewTabs<K extends string>({
 
 /** Filters on the left, search on the right, above a table. */
 export function Toolbar({ children }: { children: React.ReactNode }) {
-  return <div className="flex flex-wrap items-center justify-between gap-3 px-5 pb-4">{children}</div>;
+  return <div className="flex flex-wrap items-center justify-between gap-3 border-b px-5 py-4">{children}</div>;
 }
