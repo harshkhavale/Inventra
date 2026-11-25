@@ -55,7 +55,7 @@ export function AppSidebar() {
         <div className="flex items-center gap-3">
           <Logo />
           <div className="min-w-0">
-            <div className="text-base font-bold tracking-tight text-white">Inventra</div>
+            <div className="text-base font-bold tracking-tight text-foreground">Inventra</div>
             <div className="truncate text-xs text-sidebar-muted">{COMPANY}</div>
           </div>
         </div>
@@ -73,7 +73,7 @@ export function AppSidebar() {
                   const Icon = item.icon;
                   return (
                     <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton asChild isActive={active} className="h-9 font-medium transition-colors hover:text-white data-[active=true]:bg-primary/20 data-[active=true]:font-semibold data-[active=true]:text-white data-[active=true]:shadow-[inset_0_0_0_1px_rgb(143_162_255/0.22),0_0_18px_-6px_rgb(48_71_214/0.7)]">
+                      <SidebarMenuButton asChild isActive={active} className="h-9 font-medium transition-colors data-[active=true]:bg-white data-[active=true]:font-semibold data-[active=true]:text-foreground data-[active=true]:shadow-[0_1px_2px_rgb(16_24_40/0.06),0_0_0_1px_rgb(16_24_40/0.05)]">
                         <Link href={item.href} onClick={() => isMobile && setOpenMobile(false)}>
                           <Icon className={cn(active && "text-sidebar-ring")} />
                           <span>{item.label}</span>
@@ -82,7 +82,7 @@ export function AppSidebar() {
                       {count > 0 && (
                         <SidebarMenuBadge
                           aria-label={`${count} need attention`}
-                          className={cn("top-2 rounded-full", item.badge === "stock" ? "bg-warning-fill/20 text-[#ffc56b]" : "bg-white/10 text-white")}
+                          className={cn("top-2 rounded-full", item.badge === "stock" ? "bg-warning-soft text-warning" : "bg-white text-foreground shadow-[0_0_0_1px_rgb(16_24_40/0.08)]")}
                         >
                           {count}
                         </SidebarMenuBadge>
@@ -97,13 +97,13 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-3">
-        <div className="rounded-xl border border-white/[0.07] bg-white/[0.04] p-3">
+        <div className="rounded-xl border bg-white p-3 shadow-card">
           <div className="flex items-center gap-2.5">
             <Avatar className="size-[34px]">
-              <AvatarFallback className="bg-primary/30 text-[13px] font-bold text-[#dce2ff]">AS</AvatarFallback>
+              <AvatarFallback className="bg-info-soft text-[13px] font-bold text-info">AS</AvatarFallback>
             </Avatar>
             <div className="min-w-0">
-              <div className="text-[13.5px] font-semibold text-white">Arjun Sen</div>
+              <div className="text-[13.5px] font-semibold text-foreground">Arjun Sen</div>
               <div className="text-xs text-sidebar-muted">Owner · Admin</div>
             </div>
           </div>
@@ -111,7 +111,7 @@ export function AppSidebar() {
             variant="outline"
             size="sm"
             onClick={resetDemo}
-            className="mt-3 w-full border-white/10 bg-transparent text-xs text-sidebar-foreground hover:bg-white/10 hover:text-white"
+            className="mt-3 w-full text-xs"
           >
             <RotateCcw /> Reset demo data
           </Button>
