@@ -95,7 +95,7 @@ export function GodownsView() {
               onClick={() => setSelected(g.id)}
               className={cn(
                 "flex flex-col gap-3.5 rounded-[14px] border bg-white p-5 text-left transition",
-                on ? "border-primary ring-3 ring-primary/15" : "border-border hover:border-[#c9cfda]",
+                on ? "border-primary ring-3 ring-primary/15" : "border-border shadow-card hover:shadow-card-hover",
               )}
             >
               <div className="flex w-full justify-between gap-3">

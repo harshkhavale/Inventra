@@ -55,8 +55,8 @@ export function AppSidebar() {
         <div className="flex items-center gap-3">
           <Logo />
           <div className="min-w-0">
-            <div className="text-base font-bold tracking-tight text-white">Inventra</div>
-            <div className="truncate text-xs text-sidebar-foreground/80">{COMPANY}</div>
+            <div className="text-base font-bold tracking-tight text-foreground">Inventra</div>
+            <div className="truncate text-xs text-muted-foreground">{COMPANY}</div>
           </div>
         </div>
       </SidebarHeader>
@@ -64,7 +64,7 @@ export function AppSidebar() {
       <SidebarContent className="gap-1">
         {NAV.map((group) => (
           <SidebarGroup key={group.group} className="py-1">
-            <SidebarGroupLabel className="tracking-[0.08em] text-sidebar-foreground/60 uppercase">{group.group}</SidebarGroupLabel>
+            <SidebarGroupLabel className="tracking-[0.08em] text-muted-foreground uppercase">{group.group}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {group.items.map((item) => {
@@ -73,7 +73,7 @@ export function AppSidebar() {
                   const Icon = item.icon;
                   return (
                     <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton asChild isActive={active} className="h-9 font-medium hover:text-white data-[active=true]:font-medium">
+                      <SidebarMenuButton asChild isActive={active} className="h-9 font-medium data-[active=true]:bg-card data-[active=true]:font-semibold data-[active=true]:shadow-card">
                         <Link href={item.href} onClick={() => isMobile && setOpenMobile(false)}>
                           <Icon className={cn(active && "text-sidebar-ring")} />
                           <span>{item.label}</span>
@@ -82,7 +82,7 @@ export function AppSidebar() {
                       {count > 0 && (
                         <SidebarMenuBadge
                           aria-label={`${count} need attention`}
-                          className={cn("top-2 rounded-full", item.badge === "stock" ? "bg-[#5a3a0c] text-[#ffd9a0]" : "bg-[#2e3750] text-[#e4e8f2]")}
+                          className={cn("top-2 rounded-full", item.badge === "stock" ? "bg-warning-soft text-warning" : "bg-card text-foreground shadow-xs")}
                         >
                           {count}
                         </SidebarMenuBadge>
@@ -97,21 +97,21 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-3">
-        <div className="rounded-xl bg-white/5 p-3">
+        <div className="rounded-xl border bg-card p-3 shadow-card">
           <div className="flex items-center gap-2.5">
             <Avatar className="size-[34px]">
-              <AvatarFallback className="bg-[#2e3a63] text-[13px] font-bold text-[#dce2ff]">AS</AvatarFallback>
+              <AvatarFallback className="bg-info-soft text-[13px] font-bold text-info">AS</AvatarFallback>
             </Avatar>
             <div className="min-w-0">
-              <div className="text-[13.5px] font-semibold text-white">Arjun Sen</div>
-              <div className="text-xs text-sidebar-foreground/80">Owner · Admin</div>
+              <div className="text-[13.5px] font-semibold text-foreground">Arjun Sen</div>
+              <div className="text-xs text-muted-foreground">Owner · Admin</div>
             </div>
           </div>
           <Button
             variant="outline"
             size="sm"
             onClick={resetDemo}
-            className="mt-3 w-full border-white/10 bg-transparent text-xs text-sidebar-foreground hover:bg-sidebar-accent hover:text-white"
+            className="mt-3 w-full text-xs"
           >
             <RotateCcw /> Reset demo data
           </Button>

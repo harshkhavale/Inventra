@@ -35,7 +35,7 @@ function StatBody({ label, value, sub, tone = "muted", large }: StatProps & { la
 export function KpiTile({ href, ...stat }: StatProps & { href: string }) {
   return (
     <Link href={href} className="group rounded-xl outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
-      <Card className="h-full gap-1.5 py-5 transition group-hover:border-[#c9cfda] group-hover:shadow-md">
+      <Card className="h-full gap-1.5 py-5 transition group-hover:-translate-y-0.5 group-hover:shadow-card-hover">
         <StatBody {...stat} large />
       </Card>
     </Link>

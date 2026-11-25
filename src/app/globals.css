@@ -11,7 +11,7 @@
 :root {
   --radius: 0.625rem;
 
-  --background: #f5f6f8;
+  --background: #f5f4f0;
   --foreground: #0e1424;
   --card: #ffffff;
   --card-foreground: #0e1424;
@@ -19,15 +19,15 @@
   --popover-foreground: #0e1424;
   --primary: #3047d6;
   --primary-foreground: #ffffff;
-  --secondary: #f0f2f5;
+  --secondary: #f0efea;
   --secondary-foreground: #344054;
-  --muted: #edeff3;
+  --muted: #eeede8;
   --muted-foreground: #5f6b7e;
   --accent: #eef1ff;
   --accent-foreground: #1f33a8;
   --destructive: #d92d20;
-  --border: #e6e8ee;
-  --input: #d3d8e1;
+  --border: #e6e4de;
+  --input: #d6d3cb;
   --ring: #3047d6;
 
   --success: #0b6b33;
@@ -49,21 +49,16 @@
   --chart-4: #e88a0c;
   --chart-5: #9fb0f5;
 
-  --sidebar: #0f1320;
-  --sidebar-foreground: #b9c0ce;
+  --sidebar: #ecebe5;
+  --sidebar-foreground: #4a4f5c;
   --sidebar-primary: #3047d6;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #232b40;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #1f2638;
-  --sidebar-ring: #8fa2ff;
+  --sidebar-accent: #e1dfd7;
+  --sidebar-accent-foreground: #0e1424;
+  --sidebar-border: #dedbd3;
+  --sidebar-ring: #3047d6;
 
-  --scrollbar: #c9ced8;
-}
-
-/* Dark scrollbar thumb inside the navy sidebar. */
-[data-sidebar="sidebar"] {
-  --scrollbar: rgb(255 255 255 / 0.16);
+  --scrollbar: #cfccc4;
 }
 
 @theme inline {
@@ -120,6 +115,10 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Soft two-layer shadow that lifts white cards off the warm page. */
+  --shadow-card: 0 1px 2px rgb(40 36 28 / 0.05), 0 6px 16px -4px rgb(40 36 28 / 0.07);
+  --shadow-card-hover: 0 2px 4px rgb(40 36 28 / 0.06), 0 12px 28px -6px rgb(40 36 28 / 0.12);
 }
 
 @layer base {
