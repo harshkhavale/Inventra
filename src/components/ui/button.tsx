@@ -1,61 +1,63 @@
-import type { ButtonHTMLAttributes } from "react";
-import { cn } from "@/lib/cn";
+import * as React from "react"
+import { cva, type VariantProps } from "class-variance-authority"
+import { cn } from "@/lib/utils"
+import { Slot } from "radix-ui"
 
-type Variant = "default" | "primary" | "dark" | "ghost";
-type Size = "md" | "sm";
+const buttonVariants = cva(
+  "inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  {
+    variants: {
+      variant: {
+        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        destructive:
+          "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40",
+        outline:
+          "border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
+        secondary:
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        ghost:
+          "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
+        link: "text-primary underline-offset-4 hover:underline",
+      },
+      size: {
+        default: "h-9 px-4 py-2 has-[>svg]:px-3",
+        xs: "h-6 gap-1 rounded-md px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3",
+        sm: "h-8 gap-1.5 rounded-md px-3 has-[>svg]:px-2.5",
+        lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
+        icon: "size-9",
+        "icon-xs": "size-6 rounded-md [&_svg:not([class*='size-'])]:size-3",
+        "icon-sm": "size-8",
+        "icon-lg": "size-10",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+)
 
-const variants: Record<Variant, string> = {
-  default: "border-field bg-white text-ink hover:bg-[#f2f4f7]",
-  primary: "border-brand bg-brand text-white hover:bg-brand-hover hover:border-brand-hover",
-  dark: "border-ink bg-ink text-white hover:bg-ink-hover",
-  ghost: "border-transparent bg-transparent text-brand hover:bg-brand-soft",
-};
+function Button({
+  className,
+  variant = "default",
+  size = "default",
+  asChild = false,
+  ...props
+}: React.ComponentProps<"button"> &
+  VariantProps<typeof buttonVariants> & {
+    asChild?: boolean
+  }) {
+  const Comp = asChild ? Slot.Root : "button"
 
-const sizes: Record<Size, string> = {
-  md: "min-h-9 px-3.5 text-[13px] rounded-[9px]",
-  sm: "min-h-[30px] px-2.5 text-[12.5px] rounded-lg",
-};
-
-export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: Variant;
-  size?: Size;
-}
-
-export function Button({ variant = "default", size = "md", className, type = "button", ...props }: ButtonProps) {
   return (
-    <button
-      type={type}
-      className={cn(
-        "inline-flex items-center justify-center gap-1.5 whitespace-nowrap border font-semibold transition-colors disabled:opacity-50",
-        variants[variant],
-        sizes[size],
-        className,
-      )}
+    <Comp
+      data-slot="button"
+      data-variant={variant}
+      data-size={size}
+      className={cn(buttonVariants({ variant, size, className }))}
       {...props}
     />
-  );
+  )
 }
 
-export function IconButton({ className, type = "button", ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { "aria-label": string }) {
-  return (
-    <button
-      type={type}
-      className={cn(
-        "inline-flex size-9 shrink-0 items-center justify-center rounded-[9px] border border-[#e1e4ea] bg-white text-[#3b4556] transition-colors hover:bg-[#f2f4f7]",
-        className,
-      )}
-      {...props}
-    />
-  );
-}
-
-/** Inline text button used for record names inside tables and lists. */
-export function LinkButton({ className, type = "button", ...props }: ButtonHTMLAttributes<HTMLButtonElement>) {
-  return (
-    <button
-      type={type}
-      className={cn("p-0 text-left font-semibold text-ink hover:text-brand hover:underline", className)}
-      {...props}
-    />
-  );
-}
+export { Button, buttonVariants }

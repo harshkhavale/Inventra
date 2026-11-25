@@ -1,20 +1,33 @@
-import { cn } from "@/lib/cn";
+"use client"
 
-export type Fill = "brand" | "soft" | "good" | "warn" | "bad";
+import * as React from "react"
+import { cn } from "@/lib/utils"
+import { Progress as ProgressPrimitive } from "radix-ui"
 
-const fills: Record<Fill, string> = {
-  brand: "bg-brand",
-  soft: "bg-brand-muted",
-  good: "bg-good-fill",
-  warn: "bg-warn-fill",
-  bad: "bg-bad-fill",
-};
-
-/** Horizontal meter. `value` is a 0–100 percentage. */
-export function Progress({ value, fill = "brand", className }: { value: number; fill?: Fill; className?: string }) {
+function Progress({
+  className,
+  indicatorClassName,
+  value,
+  ...props
+}: React.ComponentProps<typeof ProgressPrimitive.Root> & {
+  indicatorClassName?: string
+}) {
   return (
-    <div className={cn("h-1.5 overflow-hidden rounded-full bg-track", className)}>
-      <div className={cn("h-full rounded-full transition-[width] duration-500", fills[fill])} style={{ width: `${value}%` }} />
-    </div>
-  );
+    <ProgressPrimitive.Root
+      data-slot="progress"
+      className={cn(
+        "relative h-2 w-full overflow-hidden rounded-full bg-muted",
+        className
+      )}
+      {...props}
+    >
+      <ProgressPrimitive.Indicator
+        data-slot="progress-indicator"
+        className={cn("h-full w-full flex-1 bg-primary transition-all", indicatorClassName)}
+        style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
+      />
+    </ProgressPrimitive.Root>
+  )
 }
+
+export { Progress }

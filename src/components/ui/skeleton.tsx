@@ -1,13 +1,13 @@
-/** Placeholder shown while a client-rendered view mounts. */
-export function ViewSkeleton() {
+import { cn } from "@/lib/utils"
+
+function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
   return (
-    <div aria-busy="true" aria-label="Loading" className="flex animate-pulse flex-col gap-5">
-      <div className="grid gap-3.5 sm:grid-cols-3">
-        {[0, 1, 2].map((i) => (
-          <div key={i} className="h-[98px] rounded-[14px] border border-line bg-white" />
-        ))}
-      </div>
-      <div className="h-[420px] rounded-[14px] border border-line bg-white" />
-    </div>
-  );
+    <div
+      data-slot="skeleton"
+      className={cn("animate-pulse rounded-md bg-accent", className)}
+      {...props}
+    />
+  )
 }
+
+export { Skeleton }

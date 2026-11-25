@@ -1,136 +1,158 @@
-"use client";
+"use client"
 
-import { X } from "lucide-react";
-import { useEffect, useRef } from "react";
-import { cn } from "@/lib/cn";
-import { IconButton } from "./button";
-import { Eyebrow } from "./page-header";
+import * as React from "react"
+import { cn } from "@/lib/utils"
+import { XIcon } from "lucide-react"
+import { Dialog as DialogPrimitive } from "radix-ui"
 
-/**
- * Built on the native <dialog> element, which gives us a focus trap, Escape
- * to close and an inert background for free.
- */
-function useModalDialog(onClose: () => void) {
-  const ref = useRef<HTMLDialogElement>(null);
-  useEffect(() => {
-    const el = ref.current;
-    if (el && !el.open) el.showModal();
-    document.documentElement.style.overflow = "hidden";
-    return () => {
-      document.documentElement.style.overflow = "";
-    };
-  }, []);
-  const props = {
-    ref,
-    onCancel: (e: React.SyntheticEvent) => {
-      e.preventDefault();
-      onClose();
-    },
-    // A click whose target is the <dialog> itself landed on the backdrop.
-    onClick: (e: React.MouseEvent) => {
-      if (e.target === e.currentTarget) onClose();
-    },
-  };
-  return props;
+import { Button } from "@/components/ui/button"
+
+function Dialog({
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Root>) {
+  return <DialogPrimitive.Root data-slot="dialog" {...props} />
 }
 
-function DialogHeader({ eyebrow, title, onClose, children }: { eyebrow: string; title: React.ReactNode; onClose: () => void; children?: React.ReactNode }) {
+function DialogTrigger({
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Trigger>) {
+  return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />
+}
+
+function DialogPortal({
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Portal>) {
+  return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />
+}
+
+function DialogClose({
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Close>) {
+  return <DialogPrimitive.Close data-slot="dialog-close" {...props} />
+}
+
+function DialogOverlay({
+  className,
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Overlay>) {
   return (
-    <div className="flex justify-between gap-4 border-b border-line-soft px-6 pt-[22px] pb-4">
-      <div className="min-w-0">
-        <Eyebrow>{eyebrow}</Eyebrow>
-        <h2 className="text-xl font-[650] tracking-[-0.01em]">{title}</h2>
+    <DialogPrimitive.Overlay
+      data-slot="dialog-overlay"
+      className={cn(
+        "fixed inset-0 z-50 bg-black/50 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+function DialogContent({
+  className,
+  children,
+  showCloseButton = true,
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Content> & {
+  showCloseButton?: boolean
+}) {
+  return (
+    <DialogPortal data-slot="dialog-portal">
+      <DialogOverlay />
+      <DialogPrimitive.Content
+        data-slot="dialog-content"
+        className={cn(
+          "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg",
+          className
+        )}
+        {...props}
+      >
         {children}
-      </div>
-      <IconButton aria-label="Close" onClick={onClose}>
-        <X className="size-4" />
-      </IconButton>
+        {showCloseButton && (
+          <DialogPrimitive.Close
+            data-slot="dialog-close"
+            className="absolute top-4 right-4 rounded-xs opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+          >
+            <XIcon />
+            <span className="sr-only">Close</span>
+          </DialogPrimitive.Close>
+        )}
+      </DialogPrimitive.Content>
+    </DialogPortal>
+  )
+}
+
+function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="dialog-header"
+      className={cn("flex flex-col gap-2 text-center sm:text-left", className)}
+      {...props}
+    />
+  )
+}
+
+function DialogFooter({
+  className,
+  showCloseButton = false,
+  children,
+  ...props
+}: React.ComponentProps<"div"> & {
+  showCloseButton?: boolean
+}) {
+  return (
+    <div
+      data-slot="dialog-footer"
+      className={cn(
+        "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
+        className
+      )}
+      {...props}
+    >
+      {children}
+      {showCloseButton && (
+        <DialogPrimitive.Close asChild>
+          <Button variant="outline">Close</Button>
+        </DialogPrimitive.Close>
+      )}
     </div>
-  );
+  )
 }
 
-export function Modal({
-  eyebrow,
-  title,
-  onClose,
-  footer,
-  children,
-  width = 720,
-}: {
-  eyebrow: string;
-  title: string;
-  onClose: () => void;
-  footer: React.ReactNode;
-  children: React.ReactNode;
-  width?: number;
-}) {
-  const dialog = useModalDialog(onClose);
+function DialogTitle({
+  className,
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Title>) {
   return (
-    <dialog
-      {...dialog}
-      aria-label={title}
-      style={{ width: `min(${width}px, calc(100% - 32px))` }}
-      className="m-auto max-h-[calc(100dvh-32px)] animate-pop-in overflow-y-auto rounded-[18px] bg-white p-0 text-ink shadow-pop backdrop:animate-fade-in backdrop:bg-ink/40"
-    >
-      <DialogHeader eyebrow={eyebrow} title={title} onClose={onClose} />
-      <div className="flex flex-col gap-[18px] px-6 py-5">{children}</div>
-      <div className="flex flex-wrap justify-end gap-2 border-t border-line-soft px-6 pt-4 pb-[22px]">{footer}</div>
-    </dialog>
-  );
+    <DialogPrimitive.Title
+      data-slot="dialog-title"
+      className={cn("text-lg leading-none font-semibold", className)}
+      {...props}
+    />
+  )
 }
 
-export function Drawer({
-  eyebrow,
-  title,
-  badge,
-  onClose,
-  children,
-  label,
-  titleClassName,
-}: {
-  eyebrow: string;
-  title: string;
-  badge?: React.ReactNode;
-  onClose: () => void;
-  children: React.ReactNode;
-  label: string;
-  titleClassName?: string;
-}) {
-  const dialog = useModalDialog(onClose);
+function DialogDescription({
+  className,
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Description>) {
   return (
-    <dialog
-      {...dialog}
-      aria-label={label}
-      className="m-0 ml-auto h-dvh max-h-dvh w-[min(580px,100%)] max-w-full animate-slide-in overflow-y-auto bg-white p-0 text-ink shadow-drawer backdrop:animate-fade-in backdrop:bg-ink/40"
-    >
-      <DialogHeader eyebrow={eyebrow} title={<span className={cn(titleClassName)}>{title}</span>} onClose={onClose}>
-        {badge && <div className="mt-2.5">{badge}</div>}
-      </DialogHeader>
-      <div className="flex flex-col gap-[22px] px-6 py-5">{children}</div>
-    </dialog>
-  );
+    <DialogPrimitive.Description
+      data-slot="dialog-description"
+      className={cn("text-sm text-muted-foreground", className)}
+      {...props}
+    />
+  )
 }
 
-export function SectionTitle({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <h3 className={cn("mb-3 text-sm font-semibold tracking-[-0.01em]", className)}>{children}</h3>;
-}
-
-/** Subtotal / GST / Total block used on orders and order forms. */
-export function Totals({ subtotal, gst, total }: { subtotal: string; gst: string; total: string }) {
-  return (
-    <dl className="ml-auto flex w-[min(280px,100%)] flex-col gap-1.5 text-[13.5px]">
-      <div className="flex justify-between">
-        <dt className="text-muted">Subtotal</dt>
-        <dd className="tabular">{subtotal}</dd>
-      </div>
-      <div className="flex justify-between">
-        <dt className="text-muted">GST 18%</dt>
-        <dd className="tabular">{gst}</dd>
-      </div>
-      <div className="flex justify-between border-t border-line pt-2 text-base font-[650]">
-        <dt>Total</dt>
-        <dd className="tabular">{total}</dd>
-      </div>
-    </dl>
-  );
+export {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogOverlay,
+  DialogPortal,
+  DialogTitle,
+  DialogTrigger,
 }
